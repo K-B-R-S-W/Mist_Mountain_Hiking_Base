@@ -114,7 +114,12 @@ export function SiteAssetUpload({
       </form>
 
       {currentUrl ? (
-        <form action={removeSiteAsset.bind(null, type)} className="mt-2">
+        <form
+          action={async () => {
+            await removeSiteAsset(type);
+          }}
+          className="mt-2"
+        >
           <ConfirmSubmitButton confirmMessage={removeConfirmMessage} className="text-xs text-red-600 underline">
             Remove
           </ConfirmSubmitButton>
