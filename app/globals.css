@@ -1,0 +1,203 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #163126; /* deep forest, from the tin roof */
+  --color-secondary: #284a3a; /* moss */
+  --color-accent: #b06a3c; /* clay / terracotta */
+  --color-background: #f8f6f2; /* warm cream page canvas */
+  --color-surface: #ffffff; /* cards lift off the cream */
+  --color-text: #1d1d1d;
+  --color-muted: #6b6b6b;
+
+  --font-display: "Fraunces", Georgia, serif;
+  --font-body: "Work Sans", "Helvetica Neue", sans-serif;
+
+  --radius-card: 12px;
+  --radius-card-inner: 8px; /* concentric: 12 - 8px padding = 4, adjust per component */
+}
+
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  scroll-behavior: smooth;
+  /* Mobile browsers (esp. iOS Safari) resize the viewport as chrome
+     shows/hides; without this, 100vw can trigger a horizontal scrollbar. */
+  overflow-x: hidden;
+}
+
+body {
+  background: var(--color-background);
+  color: var(--color-text);
+  font-family: var(--font-body);
+  overflow-x: hidden;
+}
+
+/* Any stray wide element (image, table, iframe) is clipped instead of
+   pushing the page into horizontal scroll on small screens. */
+img,
+video,
+iframe,
+svg {
+  max-width: 100%;
+}
+
+/* Dynamic viewport height helpers — 100vh includes mobile browser chrome
+   and causes hero/full-height sections to be taller than the visible
+   screen. Use these instead of raw vh for any full-screen mobile section. */
+.h-screen-safe {
+  height: 100vh;
+  height: 100svh;
+}
+
+.min-h-screen-safe {
+  min-height: 100vh;
+  min-height: 100svh;
+}
+
+/* Bottom safe-area for iOS home-indicator devices, used by the sticky
+   mobile booking bar and mobile drawers. */
+.pb-safe {
+  padding-bottom: max(1rem, env(safe-area-inset-bottom));
+}
+
+.pt-safe {
+  padding-top: env(safe-area-inset-top);
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-display);
+  text-wrap: balance;
+}
+
+p,
+li {
+  text-wrap: pretty;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/*
+ * Signature element: a topographic contour-line motif used as a quiet
+ * section divider / background texture. Ties to "mountain" without
+ * relying on stock photography or a generic gradient.
+ * Usage: <div class="contour-divider" />
+ */
+.contour-divider {
+  height: 64px;
+  background-image: repeating-radial-gradient(
+    circle at 20% 40%,
+    transparent 0,
+    transparent 18px,
+    rgba(22, 49, 38, 0.06) 19px,
+    rgba(22, 49, 38, 0.06) 20px
+  );
+  background-color: var(--color-background);
+}
+
+.panel-accent-tint {
+  background-color: color-mix(in srgb, var(--color-accent) 10%, var(--color-background));
+}
+
+.panel-secondary-tint {
+  background-color: color-mix(in srgb, var(--color-secondary) 8%, var(--color-background));
+}
+
+.page-shell {
+  margin-inline: auto;
+  width: min(1120px, calc(100% - 3rem));
+}
+
+.card {
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: var(--radius-card);
+  background: var(--color-surface);
+  padding: 1rem;
+}
+
+.eyebrow {
+  font-size: 0.75rem;
+  letter-spacing: 0.2em;
+  color: var(--color-muted);
+}
+
+.badge {
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 999px;
+  padding: 0.25rem 0.65rem;
+  font-size: 0.75rem;
+}
+
+.btn-primary {
+  border-radius: 0.5rem;
+  background: var(--color-primary);
+  color: var(--color-background);
+  font-size: 0.875rem;
+  font-weight: 500;
+  padding: 0.65rem 1rem;
+}
+
+.btn-secondary {
+  border-radius: 0.5rem;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-size: 0.8rem;
+  font-weight: 500;
+  padding: 0.4rem 0.75rem;
+}
+
+.btn-secondary:disabled {
+  opacity: 0.35;
+  pointer-events: none;
+}
+
+.btn-danger {
+  border-radius: 0.5rem;
+  border: 1px solid rgba(185, 28, 28, 0.3);
+  background: transparent;
+  color: #b91c1c;
+  font-size: 0.8rem;
+  font-weight: 500;
+  padding: 0.4rem 0.75rem;
+}
+
+.link-inline {
+  color: var(--color-accent);
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.form-field {
+  display: grid;
+  gap: 0.35rem;
+  font-size: 0.875rem;
+  color: var(--color-muted);
+}
+
+.form-input {
+  width: 100%;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: 0.45rem;
+  background: white;
+  color: var(--color-text);
+  padding: 0.55rem 0.7rem;
+  font-size: 0.875rem;
+}
+
+.form-input:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 1px;
+}
