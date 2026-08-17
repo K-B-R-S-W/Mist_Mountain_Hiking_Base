@@ -65,7 +65,7 @@ export default async function AdminMediaPage() {
                 }}
               >
                 <ConfirmSubmitButton
-                  confirmMessage="Delete this media file? Anything still referencing it will show a broken image."
+                  confirmMessage="Delete this media file? It will be removed from all attached rooms, gallery items, testimonials, and site branding."
                   className="btn-danger w-full"
                 >
                   Delete
