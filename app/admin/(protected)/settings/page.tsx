@@ -1,6 +1,7 @@
 import { updateSiteSettings } from "@/lib/actions/update-site-settings";
 import { getSiteBranding, getSiteSettings } from "@/lib/repositories";
 import { SiteAssetUpload } from "@/components/admin/site-asset-upload";
+import { RichTextEditor } from "@/components/admin/rich-text-editor";
 
 export default async function AdminSettingsPage() {
   const [settings, branding] = await Promise.all([getSiteSettings(), getSiteBranding()]);
@@ -79,7 +80,7 @@ export default async function AdminSettingsPage() {
       <form
         action={async (formData) => {
           "use server";
-          await updateSiteSettings({
+          const result = await updateSiteSettings({
             hotelName: formData.get("hotelName"),
             tagline: formData.get("tagline"),
             phone: formData.get("phone"),
@@ -94,7 +95,24 @@ export default async function AdminSettingsPage() {
             facebook: formData.get("facebook"),
             instagram: formData.get("instagram"),
             tiktok: formData.get("tiktok"),
+            aboutIntro: formData.get("aboutIntro"),
+            aboutDifferent: formData.get("aboutDifferent"),
+            aboutLand: formData.get("aboutLand"),
+            aboutLocation: formData.get("aboutLocation"),
+            aboutWhoFor: formData.get("aboutWhoFor"),
+            aboutTeam: formData.get("aboutTeam"),
+            aboutSustainability: formData.get("aboutSustainability"),
           });
+          // withAdminAction never throws — it returns { ok: false, error }
+          // on validation/DB failure. Previously that result was discarded
+          // here, so a bad value in ANY field (e.g. a malformed URL in
+          // Facebook/Instagram/TikTok/Booking, all .url()-validated) made
+          // the whole save silently no-op: no error, nothing persisted,
+          // page just re-rendered as if it had worked. Throwing surfaces
+          // it as a real error instead.
+          if (!result.ok) {
+            throw new Error(result.error);
+          }
         }}
         className="card mt-6 space-y-4"
       >
@@ -219,6 +237,48 @@ export default async function AdminSettingsPage() {
               . Also requires a <span className="font-mono">GOOGLE_PLACES_API_KEY</span> server
               environment variable (see README).
             </p>
+          </div>
+        </div>
+
+        <div className="border-t border-black/5 pt-4">
+          <h3 className="text-sm font-medium">About page content</h3>
+          <p className="mt-1 text-xs text-muted">
+            Shown on the public /about page. Leave any section blank to fall back to its default
+            copy. Use the toolbar for bold, headings, and bullet/numbered lists.
+          </p>
+          <div className="mt-3 space-y-5">
+            <RichTextEditor
+              name="aboutIntro"
+              label="Story / intro"
+              defaultValue={settings.aboutIntro}
+              placeholder="Who Mist Mountain is, in a couple of sentences..."
+            />
+            <RichTextEditor
+              name="aboutDifferent"
+              label="What makes it different"
+              defaultValue={settings.aboutDifferent}
+            />
+            <RichTextEditor
+              name="aboutLand"
+              label="The land (plantation & crops)"
+              defaultValue={settings.aboutLand}
+            />
+            <RichTextEditor
+              name="aboutLocation"
+              label="Location & access"
+              defaultValue={settings.aboutLocation}
+            />
+            <RichTextEditor
+              name="aboutWhoFor"
+              label="Who it's for"
+              defaultValue={settings.aboutWhoFor}
+            />
+            <RichTextEditor name="aboutTeam" label="Local team" defaultValue={settings.aboutTeam} />
+            <RichTextEditor
+              name="aboutSustainability"
+              label="Sustainability"
+              defaultValue={settings.aboutSustainability}
+            />
           </div>
         </div>
 
