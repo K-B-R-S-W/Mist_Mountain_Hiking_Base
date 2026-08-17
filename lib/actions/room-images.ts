@@ -8,10 +8,12 @@ import { uploadMediaFile } from "@/lib/media/upload";
 
 export async function addRoomImage(formData: FormData): Promise<ActionResult<{ mediaId: string }>> {
   return withAdminAction(async ({ user }) => {
-    const roomId = formData.get("roomId");
+    const roomIdParsed = z.string().uuid().safeParse(formData.get("roomId"));
+    if (!roomIdParsed.success) throw new Error("Invalid room id.");
+    const roomId = roomIdParsed.data;
+
     const file = formData.get("file");
     const alt = formData.get("alt");
-    if (typeof roomId !== "string") throw new Error("Missing room id.");
     if (!(file instanceof File) || file.size === 0) throw new Error("No image selected.");
 
     const media = await uploadMediaFile({

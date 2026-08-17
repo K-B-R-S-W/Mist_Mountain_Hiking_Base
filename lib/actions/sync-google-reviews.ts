@@ -54,7 +54,7 @@ export async function syncGoogleReviews(): Promise<
 
       const { data: existing } = await supabase
         .from("testimonials")
-        .select("id")
+        .select("id, is_approved")
         .eq("google_review_id", review.id)
         .maybeSingle();
 
@@ -67,7 +67,7 @@ export async function syncGoogleReviews(): Promise<
           source: TESTIMONIAL_SOURCE.GOOGLE,
           source_photo_url: review.authorPhotoUrl,
           review_url: review.reviewUrl,
-          is_approved: true,
+          is_approved: existing ? existing.is_approved : true,
           is_deleted: false,
         },
         { onConflict: "google_review_id" }

@@ -8,6 +8,7 @@ import { uploadMediaFile } from "@/lib/media/upload";
 
 const createGallerySchema = z.object({
   title: z.string().trim().max(140).optional().or(z.literal("")),
+  description: z.string().trim().max(2000).optional().or(z.literal("")),
   category: z.string().trim().max(50).optional().or(z.literal("")),
   alt: z.string().trim().max(200).optional().or(z.literal("")),
   isVisible: z.coerce.boolean(),
@@ -17,12 +18,14 @@ export async function createGalleryImage(formData: FormData): Promise<ActionResu
   return withAdminAction(async ({ user }) => {
     const parsed = createGallerySchema.safeParse({
       title: formData.get("title"),
+      description: formData.get("description"),
       category: formData.get("category"),
       alt: formData.get("alt"),
       isVisible: formData.get("isVisible") === "on",
     });
     if (!parsed.success) {
-      throw new Error("Invalid gallery image: " + parsed.error.issues[0]?.message);
+      const issue = parsed.error.issues[0];
+      throw new Error(`Invalid gallery image (${issue?.path.join(".")}): ${issue?.message}`);
     }
 
     const file = formData.get("file");
@@ -46,6 +49,7 @@ export async function createGalleryImage(formData: FormData): Promise<ActionResu
       .insert({
         media_id: media.id,
         title: parsed.data.title || null,
+        description: parsed.data.description || null,
         category: parsed.data.category || null,
         is_visible: parsed.data.isVisible,
         sort_order: count ?? 0,

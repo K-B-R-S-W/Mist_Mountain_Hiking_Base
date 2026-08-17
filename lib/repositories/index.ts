@@ -6,4 +6,5 @@ export * from "./media";
 export * from "./rooms";
 export * from "./site";
 export * from "./testimonials";
+export * from "./reporting";
 

@@ -23,7 +23,13 @@ export async function deleteMedia(input: unknown): Promise<ActionResult<{ id: st
       entity_id: parsed.data.id,
     });
 
+    revalidatePath("/rooms", "layout");
+    revalidatePath("/gallery");
+    revalidatePath("/", "layout");
+    revalidatePath("/admin/settings");
     revalidatePath("/admin/media");
+    revalidatePath("/admin/testimonials");
+    revalidatePath("/admin/gallery");
     return { id: parsed.data.id };
   });
 }

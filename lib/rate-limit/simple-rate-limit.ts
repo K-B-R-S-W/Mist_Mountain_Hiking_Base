@@ -13,8 +13,27 @@ const hits = new Map<string, { count: number; resetAt: number }>();
 const WINDOW_MS = 10 * 60 * 1000; // 10 minutes
 const MAX_REQUESTS = 5;
 
+const MAX_MAP_SIZE = 1000;
+const SWEEP_THRESHOLD = 100;
+
 export function isRateLimited(key: string): boolean {
   const now = Date.now();
+
+  // Opportunistic lazy sweep of expired entries when map grows
+  if (hits.size > SWEEP_THRESHOLD) {
+    for (const [k, v] of hits.entries()) {
+      if (now > v.resetAt) {
+        hits.delete(k);
+      }
+    }
+  }
+
+  // Hard capacity cap: evict oldest entry if still overflowing
+  if (hits.size >= MAX_MAP_SIZE) {
+    const oldestKey = hits.keys().next().value;
+    if (oldestKey) hits.delete(oldestKey);
+  }
+
   const entry = hits.get(key);
 
   if (!entry || now > entry.resetAt) {

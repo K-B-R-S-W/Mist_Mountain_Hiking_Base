@@ -74,6 +74,12 @@ export type BookingInquiry = {
   message: string | null;
   status: "pending" | "contacted" | "confirmed" | "completed" | "cancelled";
   createdAt: string;
+  /** Booking channel. Present on all rows post-0004 migration (NOT NULL DEFAULT 'direct').
+   *  Optional here since the web side never writes it and pre-migration reads
+   *  may theoretically miss it if types are regenerated before the migration runs. */
+  source?: "direct" | "phone" | "booking_com" | null;
+  /** Booking.com reservation ID, populated by the Android Gmail sync. Not written by the web app. */
+  bookingRef?: string | null;
 };
 
 export type SiteSettings = {
@@ -115,4 +121,27 @@ export type AdminDashboardSummary = {
   visibleGalleryImages: number;
   approvedTestimonials: number;
   mediaLibrarySize: number;
+};
+
+export type ReportingOccupancy = {
+  occupiedRoomNights: number;
+  totalRoomNights: number;
+  rate: number;
+};
+
+export type ReportingRevenue = {
+  total: number;
+  byRoom: Array<{ name: string; revenue: number }>;
+};
+
+export type ReportingSourceBreakdown = {
+  direct: number;
+  phone: number;
+  booking_com: number;
+};
+
+export type ReportingData = {
+  occupancy: ReportingOccupancy;
+  revenue: ReportingRevenue;
+  sourceBreakdown: ReportingSourceBreakdown;
 };

@@ -2,6 +2,8 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
+import { motion, useReducedMotion } from "motion/react";
+import { EASE_OUT } from "@/lib/motion/tokens";
 import type { GalleryImage } from "@/lib/types/domain";
 
 /**
@@ -22,6 +24,7 @@ export function GalleryMasonry({ images }: { images: GalleryImage[] }) {
 
   const [activeCategory, setActiveCategory] = useState<string>("all");
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
+  const prefersReducedMotion = useReducedMotion();
 
   const filtered = useMemo(
     () => (activeCategory === "all" ? images : images.filter((image) => image.category === activeCategory)),
@@ -74,24 +77,38 @@ export function GalleryMasonry({ images }: { images: GalleryImage[] }) {
       ) : null}
 
       <div className="mt-6 columns-2 gap-4 sm:columns-3 lg:columns-4 [column-fill:_balance]">
-        {filtered.map((image, index) => (
-          <button
-            key={image.id}
-            type="button"
-            onClick={() => setLightboxIndex(index)}
-            aria-label={`Open image${image.title ? `: ${image.title}` : ""}`}
-            className="group mb-4 block w-full break-inside-avoid overflow-hidden rounded-[var(--radius-card-inner)] bg-primary/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
-          >
-            {/* eslint-disable-next-line @next/next/no-img-element -- natural aspect ratio is required for masonry; dimensions aren't stored per image */}
-            <img
-              src={image.url}
-              alt={image.alt ?? image.title ?? ""}
-              loading="lazy"
-              decoding="async"
-              className="block h-auto w-full transition duration-300 ease-out group-hover:scale-[1.03] motion-reduce:transition-none motion-reduce:group-hover:scale-100"
-            />
-          </button>
-        ))}
+        {filtered.map((image, index) => {
+          // Stagger only what's likely visible at once; cap the group so
+          // fast-scrolling doesn't queue a long, laggy delay sequence for
+          // tiles further down the grid.
+          const staggerDelay = prefersReducedMotion ? 0 : (index % 12) * 0.03;
+          return (
+            <motion.button
+              key={image.id}
+              type="button"
+              onClick={() => setLightboxIndex(index)}
+              aria-label={`Open image${image.title ? `: ${image.title}` : ""}`}
+              className="group mb-4 block w-full break-inside-avoid overflow-hidden rounded-[var(--radius-card-inner)] bg-primary/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+              initial={{ opacity: 0, y: prefersReducedMotion ? 0 : 10 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.2 }}
+              transition={{
+                duration: prefersReducedMotion ? 0.2 : 0.4,
+                delay: staggerDelay,
+                ease: EASE_OUT,
+              }}
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element -- natural aspect ratio is required for masonry; dimensions aren't stored per image */}
+              <img
+                src={image.url}
+                alt={image.alt ?? image.title ?? ""}
+                loading="lazy"
+                decoding="async"
+                className="block h-auto w-full transition duration-300 ease-out group-hover:scale-[1.03] motion-reduce:transition-none motion-reduce:group-hover:scale-100"
+              />
+            </motion.button>
+          );
+        })}
       </div>
 
       {active ? (

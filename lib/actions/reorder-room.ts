@@ -11,7 +11,7 @@ const schema = z.object({
 });
 
 export async function reorderRoom(input: unknown): Promise<ActionResult<{ id: string }>> {
-  return withAdminAction(async () => {
+  return withAdminAction(async ({ user }) => {
     const parsed = schema.safeParse(input);
     if (!parsed.success) throw new Error("Invalid reorder request.");
 
@@ -42,6 +42,13 @@ export async function reorderRoom(input: unknown): Promise<ActionResult<{ id: st
       supabase.from("rooms").update({ sort_order: current.sort_order }).eq("id", swapWith.id),
     ]);
     if (a.error || b.error) throw new Error("Failed to reorder rooms.");
+
+    await supabase.from("activity_logs").insert({
+      user_id: user.id,
+      action: "reorder",
+      entity: "room",
+      entity_id: parsed.data.id,
+    });
 
     revalidatePath("/rooms", "layout");
     revalidatePath("/admin/rooms");

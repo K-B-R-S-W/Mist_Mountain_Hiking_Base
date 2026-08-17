@@ -1,11 +1,16 @@
+import path from "path";
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  turbopack: {
+    root: path.resolve(__dirname),
+  },
   images: {
-    // Restrict remote images to the Supabase Storage project once the
-    // project ref is known — placeholder until env is provisioned.
+    // Restrict remote images to Supabase Storage and Google Places user avatars
     remotePatterns: [
       { protocol: "https", hostname: "*.supabase.co" },
+      { protocol: "https", hostname: "lh3.googleusercontent.com" },
+      { protocol: "https", hostname: "*.googleusercontent.com" },
     ],
     formats: ["image/avif", "image/webp"],
   },
