@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { withAdminAction, type ActionResult } from "@/lib/actions/with-admin-action";
+import { sanitizeRichText } from "@/lib/validation/sanitize-rich-text";
 
 const updateSiteSettingsSchema = z.object({
   hotelName: z.string().trim().min(1).max(200),
@@ -20,6 +21,13 @@ const updateSiteSettingsSchema = z.object({
   facebook: z.string().trim().url().max(500).optional().or(z.literal("")),
   instagram: z.string().trim().url().max(500).optional().or(z.literal("")),
   tiktok: z.string().trim().url().max(500).optional().or(z.literal("")),
+  aboutIntro: z.string().max(10000).optional().or(z.literal("")),
+  aboutDifferent: z.string().max(10000).optional().or(z.literal("")),
+  aboutLand: z.string().max(10000).optional().or(z.literal("")),
+  aboutLocation: z.string().max(10000).optional().or(z.literal("")),
+  aboutWhoFor: z.string().max(10000).optional().or(z.literal("")),
+  aboutTeam: z.string().max(10000).optional().or(z.literal("")),
+  aboutSustainability: z.string().max(10000).optional().or(z.literal("")),
 });
 
 export async function updateSiteSettings(input: unknown): Promise<ActionResult<void>> {
@@ -49,6 +57,13 @@ export async function updateSiteSettings(input: unknown): Promise<ActionResult<v
         facebook: settings.facebook || null,
         instagram: settings.instagram || null,
         tiktok: settings.tiktok || null,
+        about_intro: sanitizeRichText(settings.aboutIntro || ""),
+        about_different: sanitizeRichText(settings.aboutDifferent || ""),
+        about_land: sanitizeRichText(settings.aboutLand || ""),
+        about_location: sanitizeRichText(settings.aboutLocation || ""),
+        about_who_for: sanitizeRichText(settings.aboutWhoFor || ""),
+        about_team: sanitizeRichText(settings.aboutTeam || ""),
+        about_sustainability: sanitizeRichText(settings.aboutSustainability || ""),
       })
       .eq("id", 1);
 
@@ -62,6 +77,7 @@ export async function updateSiteSettings(input: unknown): Promise<ActionResult<v
     });
 
     revalidatePath("/");
+    revalidatePath("/about");
     revalidatePath("/contact");
     revalidatePath("/admin/settings");
     revalidatePath("/admin/testimonials");

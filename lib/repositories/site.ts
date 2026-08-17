@@ -8,7 +8,7 @@ export async function getSiteSettings(): Promise<SiteSettings> {
   const { data, error } = await supabase
     .from("site_settings")
     .select(
-      "hotel_name, tagline, phone, whatsapp, email, address, facebook, instagram, tiktok, booking_url, google_maps_url, google_place_id, hero_title, hero_subtitle, seo_title, seo_description, copyright"
+      "hotel_name, tagline, phone, whatsapp, email, address, facebook, instagram, tiktok, booking_url, google_maps_url, google_place_id, hero_title, hero_subtitle, seo_title, seo_description, copyright, about_intro, about_different, about_land, about_location, about_who_for, about_team, about_sustainability"
     )
     .eq("id", 1)
     .maybeSingle();
@@ -33,6 +33,13 @@ export async function getSiteSettings(): Promise<SiteSettings> {
     seoTitle: data?.seo_title ?? null,
     seoDescription: data?.seo_description ?? null,
     copyright: data?.copyright ?? null,
+    aboutIntro: data?.about_intro ?? "",
+    aboutDifferent: data?.about_different ?? "",
+    aboutLand: data?.about_land ?? "",
+    aboutLocation: data?.about_location ?? "",
+    aboutWhoFor: data?.about_who_for ?? "",
+    aboutTeam: data?.about_team ?? "",
+    aboutSustainability: data?.about_sustainability ?? "",
   };
 }
 

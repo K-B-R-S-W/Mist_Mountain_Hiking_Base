@@ -100,6 +100,14 @@ export type SiteSettings = {
   seoTitle: string | null;
   seoDescription: string | null;
   copyright: string | null;
+  /** Sanitized HTML (bold/italic/lists only). Empty string = not filled in yet. */
+  aboutIntro: string;
+  aboutDifferent: string;
+  aboutLand: string;
+  aboutLocation: string;
+  aboutWhoFor: string;
+  aboutTeam: string;
+  aboutSustainability: string;
 };
 
 export type SiteBranding = {
