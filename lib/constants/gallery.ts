@@ -8,6 +8,9 @@ export const GALLERY_CATEGORIES = {
   NATURE: "nature",
   GUESTS: "guests",
   PLANTATION: "plantation",
+  EXPERIENCES: "experiences",
+  ATTRACTION: "attraction",
+  SPRINGS: "springs",
 } as const;
 
 export type GalleryCategory =

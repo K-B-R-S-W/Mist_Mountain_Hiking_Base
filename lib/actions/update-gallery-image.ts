@@ -8,6 +8,7 @@ import { withAdminAction, type ActionResult } from "@/lib/actions/with-admin-act
 const updateGalleryImageSchema = z.object({
   id: z.string().uuid(),
   title: z.string().trim().max(140).optional().or(z.literal("")),
+  description: z.string().trim().max(2000).optional().or(z.literal("")),
   category: z.string().trim().max(50).optional().or(z.literal("")),
   isVisible: z.coerce.boolean(),
   featured: z.coerce.boolean(),
@@ -28,6 +29,7 @@ export async function updateGalleryImage(input: unknown): Promise<ActionResult<{
       .from("gallery_images")
       .update({
         title: gallery.title || null,
+        description: gallery.description || null,
         category: gallery.category || null,
         is_visible: gallery.isVisible,
         featured: gallery.featured,

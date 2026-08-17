@@ -15,7 +15,10 @@ export async function renderSiteIcon(size: { width: number; height: number }) {
 
   if (faviconUrl) {
     try {
-      const res = await fetch(faviconUrl, { next: { revalidate: 3600 } });
+      const res = await fetch(faviconUrl, {
+        next: { revalidate: 3600 },
+        signal: AbortSignal.timeout(4000),
+      });
       if (res.ok) {
         const buffer = await res.arrayBuffer();
         return new Response(buffer, {

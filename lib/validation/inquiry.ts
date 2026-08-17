@@ -6,7 +6,10 @@ export const inquirySchema = z.object({
   phone: z.string().trim().max(50).optional().or(z.literal("")),
   checkIn: z.string().date().optional().or(z.literal("")),
   checkOut: z.string().date().optional().or(z.literal("")),
-  guests: z.coerce.number().int().min(1).max(50).optional(),
+  guests: z.preprocess(
+    (val) => (val === "" || val === null || val === undefined ? undefined : val),
+    z.coerce.number().int().min(1).max(50).optional()
+  ),
   message: z.string().trim().max(2000).optional().or(z.literal("")),
   roomId: z.string().uuid().optional().or(z.literal("")),
   // Honeypot — real users never fill this in. Bots that auto-fill every

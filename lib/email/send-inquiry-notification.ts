@@ -24,8 +24,9 @@ export async function sendInquiryNotification(inquiry: {
   message?: string | null;
 }) {
   const owner = process.env.GMAIL_USER;
-  if (!owner) {
-    console.error("GMAIL_USER not set — skipping inquiry email");
+  const pass = process.env.GMAIL_APP_PASSWORD;
+  if (!owner || !pass) {
+    console.warn("GMAIL_USER or GMAIL_APP_PASSWORD not configured — skipping inquiry email");
     return;
   }
 

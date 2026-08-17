@@ -37,7 +37,7 @@ export function GuestStoriesCarousel({ testimonials }: { testimonials: Testimoni
   }, [index, paused, count, goTo]);
 
   if (count === 0) {
-    return <p className="text-sm text-background/70">Guest stories will appear here once approved.</p>;
+    return <p className="text-sm text-muted">Guest stories will appear here once approved.</p>;
   }
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -85,12 +85,12 @@ export function GuestStoriesCarousel({ testimonials }: { testimonials: Testimoni
               aria-hidden={i !== index}
             >
               <Quote className="mx-auto h-8 w-8 text-accent/60" strokeWidth={1.5} aria-hidden />
-              <p className="mx-auto mt-4 max-w-xl text-balance font-[family-name:var(--font-fraunces)] text-2xl leading-snug md:text-3xl">
+              <p className="mx-auto mt-4 max-w-xl text-balance font-[family-name:var(--font-fraunces)] text-2xl leading-snug text-text md:text-3xl">
                 &ldquo;{testimonial.quote}&rdquo;
               </p>
               <div className="mt-5 flex flex-col items-center gap-2">
                 {testimonial.photoUrl ? (
-                  <span className="relative h-14 w-14 overflow-hidden rounded-full ring-2 ring-background/25 ring-offset-2 ring-offset-secondary">
+                  <span className="relative h-14 w-14 overflow-hidden rounded-full ring-2 ring-primary/15 ring-offset-2 ring-offset-background">
                     <Image
                       src={testimonial.photoUrl}
                       alt={testimonial.name}
@@ -103,7 +103,7 @@ export function GuestStoriesCarousel({ testimonials }: { testimonials: Testimoni
                 <p className="text-accent text-sm" aria-label="5 out of 5 stars">
                   ★★★★★
                 </p>
-                <p className="text-sm font-medium text-background/90">
+                <p className="text-sm font-medium text-text/80">
                   {testimonial.name}
                   {testimonial.country ? ` · ${testimonial.country}` : ""}
                 </p>
@@ -119,7 +119,7 @@ export function GuestStoriesCarousel({ testimonials }: { testimonials: Testimoni
             type="button"
             onClick={() => goTo(index - 1)}
             aria-label="Previous guest story"
-            className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-background/25 text-background transition-colors hover:border-background/50 hover:bg-background/10 active:scale-95"
+            className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-primary/20 text-primary transition-colors hover:border-primary/40 hover:bg-primary/5 active:scale-95"
           >
             <ChevronLeft className="h-4 w-4" />
           </button>
@@ -135,9 +135,8 @@ export function GuestStoriesCarousel({ testimonials }: { testimonials: Testimoni
                 className="p-1"
               >
                 <span
-                  className={`block h-1.5 rounded-full transition-all duration-300 ${
-                    i === index ? "w-6 bg-accent" : "w-1.5 bg-background/30"
-                  }`}
+                  className={`block h-1.5 rounded-full transition-all duration-300 ${i === index ? "w-6 bg-accent" : "w-1.5 bg-primary/20"
+                    }`}
                 />
               </button>
             ))}
@@ -147,7 +146,7 @@ export function GuestStoriesCarousel({ testimonials }: { testimonials: Testimoni
             type="button"
             onClick={() => goTo(index + 1)}
             aria-label="Next guest story"
-            className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-background/25 text-background transition-colors hover:border-background/50 hover:bg-background/10 active:scale-95"
+            className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-primary/20 text-primary transition-colors hover:border-primary/40 hover:bg-primary/5 active:scale-95"
           >
             <ChevronRight className="h-4 w-4" />
           </button>

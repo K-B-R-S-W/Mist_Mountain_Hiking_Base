@@ -73,8 +73,7 @@ export async function fetchGooglePlaceReviews(placeId: string): Promise<{
       "X-Goog-Api-Key": apiKey,
       "X-Goog-FieldMask": "reviews,rating,userRatingCount,googleMapsUri",
     },
-    // Reviews change slowly; avoid hammering the API on every admin click.
-    next: { revalidate: 3600 },
+    cache: "no-store",
   });
 
   if (!res.ok) {

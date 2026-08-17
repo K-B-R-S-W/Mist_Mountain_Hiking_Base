@@ -55,9 +55,14 @@ export function SiteAssetUpload({
     };
   }, [localPreview]);
   useEffect(() => {
-    // Once the real upload resolves (revalidatePath brings a fresh
-    // currentUrl prop on next render), drop the temporary blob preview.
-    if (state?.ok && localPreview) {
+    // Once the action settles — success OR failure — drop the temporary
+    // blob preview. On success, revalidatePath brings a fresh `currentUrl`
+    // prop that replaces it. On failure, dropping it is what matters: the
+    // tile must NOT keep showing the picked file as if it had saved, or
+    // the admin has no way to tell a failed upload from a real one (this
+    // was the actual cause of "it shows in Settings but not on the site" —
+    // the DB write never happened, only the local preview looked live).
+    if (state && localPreview) {
       URL.revokeObjectURL(localPreview);
       setLocalPreview(null);
     }

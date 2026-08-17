@@ -64,3 +64,68 @@ export async function getAdminGalleryImages(): Promise<GalleryImage[]> {
     .filter((item): item is NonNullable<typeof item> => Boolean(item));
 }
 
+/**
+ * Homepage "Experiences" 3D carousel source. Same table as the main
+ * gallery — the admin just tags photos with category="experiences" in
+ * the existing Gallery admin instead of a dedicated upload flow — so no
+ * new admin UI or table was needed for this. Capped at 10: the carousel
+ * only ever keeps a couple of planes mounted either side of the active
+ * one, so anything beyond this is just unused fetched weight.
+ */
+export async function getExperienceCircuitImages(): Promise<GalleryImage[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("gallery_images")
+    .select(
+      "id, title, description, category, featured, is_visible, sort_order, media_id, media_files(url, alt)"
+    )
+    .eq("is_deleted", false)
+    .eq("is_visible", true)
+    .eq("category", "experiences")
+    .order("sort_order", { ascending: true })
+    .limit(10);
+
+  assertNoError(error, "Failed to load experience circuit images");
+  return (data ?? [])
+    .map(mapGallery)
+    .filter((item): item is NonNullable<typeof item> => Boolean(item));
+}
+
+/**
+ * /experiences page content — Tourism Circuit, Working Plantation, and
+ * Natural Springs sections. Same gallery_images table, tagged
+ * category="attraction" | "plantation" | "springs" in the admin Gallery
+ * screen — one query, grouped client-side, so adding/reordering/hiding a
+ * card is just editing a gallery row (no dedicated admin screen, no
+ * migration). See GALLERY_CATEGORIES in lib/constants/gallery.ts.
+ */
+export type ExperiencePageContent = {
+  attractions: GalleryImage[];
+  plantation: GalleryImage[];
+  springs: GalleryImage[];
+};
+
+export async function getExperiencePageContent(): Promise<ExperiencePageContent> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("gallery_images")
+    .select(
+      "id, title, description, category, featured, is_visible, sort_order, media_id, media_files(url, alt)"
+    )
+    .eq("is_deleted", false)
+    .eq("is_visible", true)
+    .in("category", ["attraction", "plantation", "springs"])
+    .order("sort_order", { ascending: true });
+
+  assertNoError(error, "Failed to load experiences page content");
+  const images = (data ?? [])
+    .map(mapGallery)
+    .filter((item): item is NonNullable<typeof item> => Boolean(item));
+
+  return {
+    attractions: images.filter((image) => image.category === "attraction"),
+    plantation: images.filter((image) => image.category === "plantation"),
+    springs: images.filter((image) => image.category === "springs"),
+  };
+}
+
