@@ -16,6 +16,22 @@
   --radius-card-inner: 8px; /* concentric: 12 - 8px padding = 4, adjust per component */
 }
 
+/*
+ * Motion tokens — single source of truth for timing/easing, referenced
+ * directly by CSS transitions below and mirrored in lib/motion/tokens.ts
+ * for Motion (motion/react) components. Keep both in sync.
+ */
+:root {
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
+
+  --motion-fast: 160ms;
+  --motion-base: 220ms;
+  --motion-slow: 420ms;
+  --motion-cinematic: 700ms;
+}
+
 html {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -113,6 +129,24 @@ li {
   background-color: color-mix(in srgb, var(--color-secondary) 8%, var(--color-background));
 }
 
+/*
+ * Location-section fallback for the topographic 3D scene (see
+ * components/site/location-panel.tsx). Same ink and restraint as
+ * .contour-divider, but scaled up into a large atmospheric background
+ * rather than a thin section-divider band — a different job, so a
+ * distinct variant rather than reusing the divider outright. Shown on
+ * mobile, under prefers-reduced-motion, and when WebGL is unavailable.
+ */
+.location-contours {
+  background-image: repeating-radial-gradient(
+    circle at 72% 28%,
+    transparent 0,
+    transparent 42px,
+    rgba(40, 74, 58, 0.05) 43px,
+    rgba(40, 74, 58, 0.05) 44px
+  );
+}
+
 .page-shell {
   margin-inline: auto;
   width: min(1120px, calc(100% - 3rem));
@@ -147,6 +181,11 @@ li {
   padding: 0.65rem 1rem;
 }
 
+.btn-primary:disabled {
+  opacity: 0.35;
+  pointer-events: none;
+}
+
 .btn-secondary {
   border-radius: 0.5rem;
   border: 1px solid rgba(0, 0, 0, 0.12);
@@ -178,6 +217,37 @@ li {
   font-weight: 500;
   text-decoration: underline;
   text-underline-offset: 4px;
+}
+
+/*
+ * Desktop nav link — color transition (unchanged behavior) plus a
+ * transform-based underline that grows from the link's own left edge.
+ * Gated behind hover-capable pointers so it never triggers a stuck
+ * hover state on touch. Covered by the global prefers-reduced-motion
+ * rule above (it targets *::after too), so no extra override needed.
+ */
+.nav-link {
+  position: relative;
+  transition: color var(--motion-fast) var(--ease-out);
+}
+
+.nav-link::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -3px;
+  height: 1px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform var(--motion-base) var(--ease-out);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .nav-link:hover::after {
+    transform: scaleX(1);
+  }
 }
 
 .form-field {

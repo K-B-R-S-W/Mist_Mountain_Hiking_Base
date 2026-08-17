@@ -35,8 +35,9 @@ export default function RootLayout({
       lang="en"
       className={`${fraunces.variable} ${workSans.variable}`}
       data-scroll-behavior="smooth"
+      suppressHydrationWarning
     >
-      <body>{children}</body>
+      <body suppressHydrationWarning>{children}</body>
     </html>
   );
 }

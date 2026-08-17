@@ -22,7 +22,6 @@ export default async function AdminGalleryPage() {
             "use server";
             await createGalleryImage(formData);
           }}
-          encType="multipart/form-data"
           className="mt-4 grid gap-4 md:grid-cols-2"
         >
           <div className="form-field">
@@ -49,6 +48,16 @@ export default async function AdminGalleryPage() {
                 </option>
               ))}
             </select>
+          </div>
+          <div className="form-field md:col-span-2">
+            <label htmlFor="description">Description</label>
+            <textarea
+              id="description"
+              name="description"
+              rows={3}
+              placeholder="Shown as card copy on /experiences for attraction, plantation, and springs categories. Optional for other categories."
+              className="form-input"
+            />
           </div>
           <div className="form-field">
             <label htmlFor="alt">Alt text</label>
@@ -77,6 +86,7 @@ export default async function AdminGalleryPage() {
                   await updateGalleryImage({
                     id: image.id,
                     title: formData.get("title"),
+                    description: formData.get("description"),
                     category: formData.get("category"),
                     isVisible: formData.get("isVisible") === "on",
                     featured: formData.get("featured") === "on",
@@ -99,6 +109,13 @@ export default async function AdminGalleryPage() {
                   type="number"
                   defaultValue={image.sortOrder}
                   className="form-input"
+                />
+                <textarea
+                  name="description"
+                  defaultValue={image.description ?? ""}
+                  rows={2}
+                  placeholder="Card copy for /experiences (attraction, plantation, springs)"
+                  className="form-input md:col-span-6"
                 />
                 <label className="inline-flex items-center gap-2 text-sm">
                   <input name="isVisible" type="checkbox" defaultChecked={image.isVisible} />

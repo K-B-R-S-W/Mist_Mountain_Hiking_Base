@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { TransitionLink } from "@/components/site/motion/transition-link";
 import { getSiteSettings } from "@/lib/repositories";
 import { GoogleMap } from "@/components/site/google-map";
 import { QuickLinks } from "@/components/site/quick-links";
@@ -41,9 +41,9 @@ export default async function ContactPage() {
             guidance on room fit and activity timing.
           </p>
           <div className="mt-5 flex flex-wrap gap-3">
-            <Link href="/book" className="btn-primary">
+            <TransitionLink href="/book" label="Book" className="btn-primary">
               Go to booking form
-            </Link>
+            </TransitionLink>
             {settings.bookingUrl ? (
               <a
                 href={settings.bookingUrl}
