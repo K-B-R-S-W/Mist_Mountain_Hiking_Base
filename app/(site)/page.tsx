@@ -186,7 +186,7 @@ export default async function HomePage() {
             <li>Pahiyangala Caves</li>
             <li>Dumbara graphite mines</li>
             <li>Four waterfalls &amp; the Thalapathgala rock plain</li>
-            <li>Kakuluwa Raja Maha Viharaya — exclusive 4x4 transport</li>
+            <li>Kakuluwa Raja Maha Viharaya</li>
           </ul>
           <TransitionLink
             href="/experiences"
