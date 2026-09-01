@@ -35,32 +35,19 @@ export function processFallbackIntent(options: {
   let message = "";
   let quickReplies: string[] = [];
 
-  if (/itinerary|plan|schedule|days|nights|trip|චාරිකා|සැලැස්ම|දින/i.test(q)) {
-    const nights = /1\s*(night|රාත්‍රී)|one\s*night/i.test(q) ? 1 : /3|three/i.test(q) ? 3 : 2;
-    const itinerary = generateCustomItinerary(nights, activeLang);
-    cards.push({ type: "itinerary", data: itinerary });
+  // 1. Check for booking / reservation intent first
+  if (/book|reserve|reservation|availability|check\s*in|check\s*out|වෙන්කර/i.test(q)) {
+    const matchedRoom = rooms.find((r) =>
+      q.includes(r.name.toLowerCase()) || (r.slug && q.includes(r.slug.toLowerCase()))
+    ) || rooms[0];
 
-    message =
-      activeLang === "si"
-        ? `ඔබ වෙනුවෙන් සැකසූ දින ${nights + 1} කඳුකර චාරිකා සැලැස්ම පහතින් දැක්වේ:`
-        : `Here is a curated ${nights + 1}-day / ${nights}-night hiking and nature stay plan tailored for you:`;
-
-    quickReplies =
-      activeLang === "si"
-        ? ["📅 කාමර වෙන්කරවා ගන්න", "🌊 ස්වාභාවික දිය තටාක", "🗺️ කුකුළුවා ලෙන් විහාරය"]
-        : ["📅 Check Room Availability", "🌊 Natural Spring Pools", "🗺️ Kukuluwa Temple Trail"];
-
-    return { message, cards, quickReplies, language: activeLang };
-  }
-
-  if (/book|reserve|reservation|dates|availability|check in|check out|වෙන්කර/i.test(q)) {
     cards.push({
       type: "booking_flow",
       data: {
-        roomId: rooms[0]?.id,
-        roomName: rooms[0]?.name,
-        pricePerNightLkr: rooms[0]?.basePrice,
-        pricePerNightUsd: rooms[0] ? Math.round(rooms[0].basePrice / USD_EXCHANGE_RATE) : undefined,
+        roomId: matchedRoom?.id,
+        roomName: matchedRoom?.name,
+        pricePerNightLkr: matchedRoom?.basePrice,
+        pricePerNightUsd: matchedRoom ? Math.round(matchedRoom.basePrice / USD_EXCHANGE_RATE) : undefined,
         availableRooms: rooms.map((r) => ({
           id: r.id,
           name: r.name,
@@ -80,6 +67,24 @@ export function processFallbackIntent(options: {
       activeLang === "si"
         ? ["🏡 සියලුම කාමර", "📍 පිහිටීම සහ මාර්ගය", "📞 WhatsApp මගින් කතා කරන්න"]
         : ["🏡 View All Rooms", "📍 Location & Driving Route", "📞 Chat on WhatsApp"];
+
+    return { message, cards, quickReplies, language: activeLang };
+  }
+
+  if (/itinerary|day\s*plan|hiking\s*circuit|plan\s*(a\s*)?(stay|trip|tour)|චාරිකා\s*සැලැස්ම/i.test(q)) {
+    const nights = /1\s*(night|රාත්‍රී)|one\s*night/i.test(q) ? 1 : /3|three/i.test(q) ? 3 : 2;
+    const itinerary = generateCustomItinerary(nights, activeLang);
+    cards.push({ type: "itinerary", data: itinerary });
+
+    message =
+      activeLang === "si"
+        ? `ඔබ වෙනුවෙන් සැකසූ දින ${nights + 1} කඳුකර චාරිකා සැලැස්ම පහතින් දැක්වේ:`
+        : `Here is a curated ${nights + 1}-day / ${nights}-night hiking and nature stay plan tailored for you:`;
+
+    quickReplies =
+      activeLang === "si"
+        ? ["📅 කාමර වෙන්කරවා ගන්න", "🌊 ස්වාභාවික දිය තටාක", "🗺️ කුකුළුවා ලෙන් විහාරය"]
+        : ["📅 Check Room Availability", "🌊 Natural Spring Pools", "🗺️ Kukuluwa Temple Trail"];
 
     return { message, cards, quickReplies, language: activeLang };
   }

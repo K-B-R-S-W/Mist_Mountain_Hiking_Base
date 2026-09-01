@@ -109,20 +109,20 @@ export async function POST(req: NextRequest) {
     const cards: CardPayload[] = [];
     const q = userMessage.toLowerCase();
 
-    if (/itinerary|plan|schedule|days|nights|trip|චාරිකා|සැලැස්ම|දින/i.test(q)) {
-      const nights = /1\s*(night|රාත්‍රී)|one\s*night/i.test(q) ? 1 : /3|three/i.test(q) ? 3 : 2;
-      cards.push({
-        type: "itinerary",
-        data: generateCustomItinerary(nights, activeLanguage),
-      });
-    } else if (/book|reserve|reservation|dates|availability|check in|check out|වෙන්කර/i.test(q)) {
+    // 1. Check for booking / reservation intent first
+    if (/book|reserve|reservation|availability|check\s*in|check\s*out|වෙන්කර/i.test(q)) {
+      // Find if user mentioned a specific room
+      const matchedRoom = rooms.find((r) =>
+        q.includes(r.name.toLowerCase()) || (r.slug && q.includes(r.slug.toLowerCase()))
+      ) || rooms[0];
+
       cards.push({
         type: "booking_flow",
         data: {
-          roomId: rooms[0]?.id,
-          roomName: rooms[0]?.name,
-          pricePerNightLkr: rooms[0]?.basePrice,
-          pricePerNightUsd: rooms[0] ? Math.round(rooms[0].basePrice / USD_EXCHANGE_RATE) : undefined,
+          roomId: matchedRoom?.id,
+          roomName: matchedRoom?.name,
+          pricePerNightLkr: matchedRoom?.basePrice,
+          pricePerNightUsd: matchedRoom ? Math.round(matchedRoom.basePrice / USD_EXCHANGE_RATE) : undefined,
           availableRooms: rooms.map((r) => ({
             id: r.id,
             name: r.name,
@@ -132,7 +132,13 @@ export async function POST(req: NextRequest) {
           })),
         },
       });
-    } else if (/room|rooms|stay|sleep|rate|price|tariff|cost|bed|කාමර|ගාස්තු/i.test(q)) {
+    } else if (/itinerary|day\s*plan|hiking\s*circuit|plan\s*(a\s*)?(stay|trip|tour)|චාරිකා\s*සැලැස්ම/i.test(q)) {
+      const nights = /1\s*(night|රාත්‍රී)|one\s*night/i.test(q) ? 1 : /3|three/i.test(q) ? 3 : 2;
+      cards.push({
+        type: "itinerary",
+        data: generateCustomItinerary(nights, activeLanguage),
+      });
+    } else if (/room|rooms|tariff|rates|price|cost|කාමර|ගාස්තු/i.test(q)) {
       cards.push({ type: "room_list", data: roomCards.slice(0, 3) });
     } else if (/spring|pool|water|swim|bath|දිය තටාක|නාන්න/i.test(q)) {
       cards.push({

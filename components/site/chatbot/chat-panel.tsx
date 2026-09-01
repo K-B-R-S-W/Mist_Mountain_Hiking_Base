@@ -341,7 +341,7 @@ export function ChatPanel({ onClose }: { onClose: () => void }) {
             onSelectQuickReply={handleSendMessage}
             onSelectRoom={handleSelectRoom}
             onNavigate={handleNavigate}
-            onBookStay={() => handleSendMessage("Can you plan a 2-day stay itinerary for me?")}
+            onBookStay={() => handleSendMessage("I want to check room availability and book")}
           />
 
           <ChatInputBar

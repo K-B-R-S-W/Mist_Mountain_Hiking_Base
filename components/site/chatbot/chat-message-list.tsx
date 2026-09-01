@@ -27,14 +27,20 @@ export function ChatMessageList({
   onNavigate?: (href: string) => void;
   onBookStay?: () => void;
 }) {
-  const bottomRef = useRef<HTMLDivElement>(null);
+  const latestMessageRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (latestMessageRef.current) {
+      latestMessageRef.current.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    }
   }, [messages, isTyping]);
 
   return (
-    <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
+    <div ref={containerRef} className="flex-1 overflow-y-auto px-4 py-4 space-y-4 scroll-smooth">
       {messages.length === 0 ? (
         <div className="flex h-full flex-col items-center justify-center text-center p-6 text-muted space-y-2">
           <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary text-white shadow-xs">
@@ -49,17 +55,25 @@ export function ChatMessageList({
         </div>
       ) : null}
 
-      {messages.map((message) => (
-        <ChatMessageItem
-          key={message.id}
-          message={message}
-          currency={currency}
-          sessionId={sessionId}
-          onSelectRoom={onSelectRoom}
-          onNavigate={onNavigate}
-          onBookStay={onBookStay}
-        />
-      ))}
+      {messages.map((message, index) => {
+        const isLatest = index === messages.length - 1;
+        return (
+          <div
+            key={message.id}
+            ref={isLatest ? latestMessageRef : null}
+            className="w-full scroll-mt-2"
+          >
+            <ChatMessageItem
+              message={message}
+              currency={currency}
+              sessionId={sessionId}
+              onSelectRoom={onSelectRoom}
+              onNavigate={onNavigate}
+              onBookStay={onBookStay}
+            />
+          </div>
+        );
+      })}
 
       {isTyping ? (
         <div className="flex items-center gap-2 text-muted text-xs">
@@ -79,8 +93,6 @@ export function ChatMessageList({
           <ChatQuickReplies replies={quickReplies} onSelect={onSelectQuickReply} />
         </div>
       ) : null}
-
-      <div ref={bottomRef} />
     </div>
   );
 }
