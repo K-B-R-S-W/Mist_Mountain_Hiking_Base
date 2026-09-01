@@ -1,9 +1,8 @@
 "use client";
 
-import { useMemo } from "react";
-import Image from "next/image";
-import { Sparkles, Trees, User } from "lucide-react";
+import { User } from "lucide-react";
 import { ChatMessage, CurrencyCode, RoomCardPayload } from "@/lib/chatbot/types";
+import { MistMountainLogo } from "./mist-mountain-logo";
 import { ChatRoomCard } from "./chat-room-card";
 import { ChatAttractionCard } from "./chat-attraction-card";
 import { ChatItineraryCard } from "./chat-itinerary-card";
@@ -24,15 +23,11 @@ function escapeHtml(str: string): string {
 function formatMarkdownContent(text: string) {
   const lines = text.split("\n");
   return lines.map((line, idx) => {
-    // 1. First escape all raw HTML to neutralize any script/img/tag injection
     const escaped = escapeHtml(line);
-
-    // 2. Safely apply markdown formatting on the escaped string
-    let formatted = escaped
+    const formatted = escaped
       .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
       .replace(/\*(.*?)\*/g, "<em>$1</em>");
 
-    // Bullet point styling
     if (/^[\*\-]\s+/.test(line)) {
       const clean = escapeHtml(line.replace(/^[\*\-]\s+/, ""))
         .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
@@ -81,13 +76,12 @@ export function ChatMessageItem({
   return (
     <div className={`flex w-full gap-2.5 ${isUser ? "justify-end" : "justify-start"}`}>
       {!isUser ? (
-        <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary text-background shadow-xs">
-          <Trees className="h-4 w-4" />
+        <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary text-background shadow-xs ring-1 ring-primary/10">
+          <MistMountainLogo className="h-4 w-4 text-white" />
         </div>
       ) : null}
 
       <div className={`max-w-[85%] space-y-2.5 ${isUser ? "items-end" : "items-start"}`}>
-        {/* Text Message Bubble */}
         {message.content ? (
           <div
             className={`rounded-2xl px-3.5 py-2.5 text-xs shadow-2xs ${
@@ -100,7 +94,6 @@ export function ChatMessageItem({
           </div>
         ) : null}
 
-        {/* Embedded Rich Cards */}
         {message.cards && message.cards.length > 0 ? (
           <div className="w-full space-y-2.5 pt-1">
             {message.cards.map((card, i) => {

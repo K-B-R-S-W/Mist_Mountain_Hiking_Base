@@ -264,10 +264,8 @@ export function ChatPanel({ onClose }: { onClose: () => void }) {
       <ChatHeader
         language={language}
         currency={currency}
-        isVoiceMode={isVoiceMode}
         onToggleLanguage={handleToggleLanguage}
         onToggleCurrency={handleToggleCurrency}
-        onToggleVoiceMode={handleToggleVoiceMode}
         onResetChat={handleResetChat}
         onClose={onClose}
       />

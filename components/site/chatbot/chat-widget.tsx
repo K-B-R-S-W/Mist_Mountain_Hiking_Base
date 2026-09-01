@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
-import { Trees, X, MessageSquare } from "lucide-react";
+import { X } from "lucide-react";
+import { MistMountainLogo } from "./mist-mountain-logo";
 import { ChatPanel } from "./chat-panel";
 
 export function ChatWidget() {
@@ -113,7 +114,7 @@ export function ChatWidget() {
             <X className="h-6 w-6" />
           ) : (
             <>
-              <Trees className="h-6 w-6" />
+              <MistMountainLogo className="h-7 w-7 text-white" />
               <span className="absolute -top-0.5 -right-0.5 flex h-3.5 w-3.5">
                 <span className="absolute inline-flex h-full w-full rounded-full bg-accent opacity-75 animate-ping" />
                 <span className="relative inline-flex h-3.5 w-3.5 rounded-full bg-accent" />
