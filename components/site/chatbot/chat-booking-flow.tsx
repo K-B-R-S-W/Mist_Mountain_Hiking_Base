@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Calendar, Users, Check, AlertCircle, Loader2, Sparkles, Phone, Mail, User } from "lucide-react";
+import { Check, AlertCircle, Loader2, Sparkles } from "lucide-react";
 import { submitChatbotBooking } from "@/lib/actions/submit-chatbot-booking";
 import { submitChatLead } from "@/lib/actions/submit-chat-lead";
 import { BookingDraftPayload, BookingVoucherPayload, CurrencyCode } from "@/lib/chatbot/types";
@@ -45,6 +45,8 @@ export function ChatBookingFlow({
         },
       ];
 
+  const todayStr = new Date().toISOString().split("T")[0];
+
   const [step, setStep] = useState<"edit" | "review" | "confirmed">("edit");
   const [roomId, setRoomId] = useState(initialDraft?.roomId || availableRooms[0]?.id || "");
   const [roomName, setRoomName] = useState(initialDraft?.roomName || availableRooms[0]?.name || "");
@@ -55,7 +57,7 @@ export function ChatBookingFlow({
   const [guestName, setGuestName] = useState(initialDraft?.guestName ?? "");
   const [email, setEmail] = useState(initialDraft?.email ?? "");
   const [phone, setPhone] = useState(initialDraft?.phone ?? "");
-  const [message, setMessage] = useState(initialDraft?.message ?? "");
+  const [message] = useState(initialDraft?.message ?? "");
 
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -71,6 +73,17 @@ export function ChatBookingFlow({
   const basePrice = pricePerNightLkr;
   const totalLkr = basePrice * nights;
   const totalUsd = Math.round(totalLkr / 310);
+  const pricePerNightUsd = Math.round(basePrice / 310);
+
+  const handleCheckInChange = (newCheckIn: string) => {
+    setCheckIn(newCheckIn);
+    if (newCheckIn && (!checkOut || new Date(checkOut) <= new Date(newCheckIn))) {
+      const d = new Date(newCheckIn);
+      d.setDate(d.getDate() + 1);
+      const nextDay = d.toISOString().split("T")[0];
+      if (nextDay) setCheckOut(nextDay);
+    }
+  };
 
   const handleProceedToReview = (e: React.FormEvent) => {
     e.preventDefault();
@@ -197,13 +210,13 @@ export function ChatBookingFlow({
 
   if (step === "review") {
     return (
-      <div className="overflow-hidden rounded-xl border border-accent/30 bg-surface p-4 shadow-sm">
+      <div className="overflow-hidden rounded-xl border border-accent/30 bg-surface p-4 shadow-sm space-y-3">
         <div className="flex items-center gap-1.5 text-accent font-semibold text-xs">
           <Sparkles className="h-4 w-4" />
           <span>Review & Confirm Reservation</span>
         </div>
 
-        <div className="mt-3 rounded-lg bg-background p-3 text-xs space-y-2 border border-black/5">
+        <div className="rounded-lg bg-background p-3 text-xs space-y-2 border border-black/5">
           <div className="flex justify-between">
             <span className="text-muted">Room:</span>
             <span className="font-semibold text-primary">{roomName || "Mountain Stay"}</span>
@@ -216,32 +229,36 @@ export function ChatBookingFlow({
           </div>
           <div className="flex justify-between">
             <span className="text-muted">Guests:</span>
-            <span className="font-medium text-text">{guests}</span>
+            <span className="font-medium text-text">{guests} {guests === 1 ? "Guest" : "Guests"}</span>
           </div>
           <div className="flex justify-between">
             <span className="text-muted">Guest:</span>
             <span className="font-medium text-text">{guestName} ({phone || email})</span>
           </div>
-          <div className="flex justify-between border-t border-black/5 pt-1.5 text-xs font-bold text-accent">
+          <div className="flex justify-between border-t border-black/5 pt-2 text-xs font-bold text-accent">
             <span>Estimated Total:</span>
             <span>{currency === "USD" ? `$${totalUsd} USD` : `LKR ${totalLkr.toLocaleString()}`}</span>
           </div>
         </div>
 
+        <p className="text-[10px] text-muted text-center leading-tight">
+          No upfront payment required in chat. Our team will verify room availability and contact you directly.
+        </p>
+
         {errorMessage ? (
-          <div className="mt-2 flex items-center gap-1.5 rounded-md bg-red-50 p-2 text-xs text-red-700">
+          <div className="flex items-center gap-1.5 rounded-md bg-red-50 p-2 text-xs text-red-700">
             <AlertCircle className="h-3.5 w-3.5 shrink-0" />
             <span>{errorMessage}</span>
           </div>
         ) : null}
 
-        <div className="mt-3 flex gap-2">
+        <div className="flex gap-2">
           <button
             onClick={() => setStep("edit")}
             type="button"
             className="w-1/3 rounded-lg border border-black/10 py-2 text-xs font-medium text-text hover:bg-black/5 transition"
           >
-            Edit
+            ← Edit
           </button>
           <button
             onClick={handleFinalConfirm}
@@ -250,7 +267,7 @@ export function ChatBookingFlow({
             className="flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-accent py-2 text-xs font-bold text-white hover:bg-accent/90 transition shadow-xs disabled:opacity-50"
           >
             {isLoading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Check className="h-3.5 w-3.5" />}
-            Confirm & Reserve
+            Confirm & Send Inquiry
           </button>
         </div>
       </div>
@@ -284,11 +301,11 @@ export function ChatBookingFlow({
               setPricePerNightLkr(chosen.basePriceLkr);
             }
           }}
-          className="w-full rounded-md border border-black/15 bg-background px-2.5 py-1.5 text-xs text-text focus:border-primary focus:outline-hidden font-medium"
+          className="w-full rounded-md border border-black/15 bg-background px-2 py-2 text-xs text-text focus:border-primary focus:outline-hidden font-medium"
         >
           {availableRooms.map((r) => (
             <option key={r.id} value={r.id}>
-              {r.name} — {currency === "USD" ? `$${r.basePriceUsd}/night` : `LKR ${r.basePriceLkr.toLocaleString()}/night`}
+              {r.name} · {currency === "USD" ? `$${r.basePriceUsd}` : `LKR ${r.basePriceLkr.toLocaleString()}`}/nt
             </option>
           ))}
         </select>
@@ -299,8 +316,9 @@ export function ChatBookingFlow({
           <label className="text-[10px] font-medium text-muted block mb-0.5">Check-in</label>
           <input
             type="date"
+            min={todayStr}
             value={checkIn}
-            onChange={(e) => setCheckIn(e.target.value)}
+            onChange={(e) => handleCheckInChange(e.target.value)}
             className="w-full rounded-md border border-black/15 bg-background px-2 py-1.5 text-xs focus:border-primary focus:outline-hidden"
           />
         </div>
@@ -308,6 +326,7 @@ export function ChatBookingFlow({
           <label className="text-[10px] font-medium text-muted block mb-0.5">Check-out</label>
           <input
             type="date"
+            min={checkIn || todayStr}
             value={checkOut}
             onChange={(e) => setCheckOut(e.target.value)}
             className="w-full rounded-md border border-black/15 bg-background px-2 py-1.5 text-xs focus:border-primary focus:outline-hidden"
@@ -367,6 +386,22 @@ export function ChatBookingFlow({
         </div>
       </div>
 
+      {/* Live Estimated Price Summary Banner */}
+      <div className="rounded-lg bg-primary/5 p-2.5 border border-primary/10 flex items-center justify-between text-xs">
+        <div>
+          <span className="text-[10px] text-muted block leading-none">Estimated Price</span>
+          <span className="font-semibold text-primary text-xs mt-0.5 block">{nights} {nights === 1 ? "Night" : "Nights"} Stay</span>
+        </div>
+        <div className="text-right">
+          <span className="text-xs font-bold text-accent block">
+            {currency === "USD" ? `$${totalUsd} USD` : `LKR ${totalLkr.toLocaleString()}`}
+          </span>
+          <span className="text-[9px] text-muted block leading-none mt-0.5">
+            {currency === "USD" ? `$${pricePerNightUsd}/nt` : `LKR ${pricePerNightLkr.toLocaleString()}/nt`}
+          </span>
+        </div>
+      </div>
+
       {errorMessage ? (
         <div className="flex items-center gap-1.5 rounded-md bg-red-50 p-2 text-xs text-red-700">
           <AlertCircle className="h-3.5 w-3.5 shrink-0" />
@@ -376,7 +411,7 @@ export function ChatBookingFlow({
 
       <button
         type="submit"
-        className="w-full rounded-lg bg-primary py-2 text-xs font-semibold text-background hover:bg-secondary transition active:scale-98"
+        className="w-full rounded-lg bg-primary py-2.5 text-xs font-semibold text-background hover:bg-secondary transition active:scale-98 shadow-2xs"
       >
         Review Reservation Details →
       </button>
