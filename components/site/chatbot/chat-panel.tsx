@@ -179,6 +179,30 @@ export function ChatPanel({ onClose }: { onClose: () => void }) {
   const handleToggleLanguage = () => {
     const next = language === "en" ? "si" : "en";
     setLanguage(next);
+
+    // If starting a conversation (only initial assistant greeting exists, no user messages yet), update the greeting to the selected language
+    setMessages((prev) => {
+      const hasUserMessages = prev.some((m) => m.role === "user");
+      if (!hasUserMessages) {
+        const greeting = next === "si" ? INITIAL_GREETING_SI : INITIAL_GREETING_EN;
+        const defaultChips =
+          next === "si"
+            ? ["📅 කාමර වෙන්කරගන්න", "🗺️ දින 2ක චාරිකාව", "🌊 දිය තටාක", "📍 පිහිටීම"]
+            : ["📅 Check Availability", "🗺️ 2-Day Itinerary", "🌊 Spring Pools", "📍 Directions"];
+
+        setQuickReplies(defaultChips);
+        return [
+          {
+            id: "init-welcome",
+            role: "assistant",
+            content: greeting,
+            createdAt: new Date().toISOString(),
+            quickReplies: defaultChips,
+          },
+        ];
+      }
+      return prev;
+    });
   };
 
   const handleToggleCurrency = () => {
