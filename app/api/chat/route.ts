@@ -107,13 +107,17 @@ export async function POST(req: NextRequest) {
     }));
 
     const cards: CardPayload[] = [];
-    const q = userMessage.toLowerCase();
+    const rawQ = userMessage.trim();
+    const cleanQ = rawQ
+      .replace(/[\u{1F300}-\u{1F9FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu, "")
+      .toLowerCase()
+      .trim();
 
     // 1. Check for booking / reservation intent first
-    if (/book|reserve|reservation|availability|check\s*in|check\s*out|වෙන්කර/i.test(q)) {
+    if (/book|reserve|reservation|availab|check\s*in|check\s*out|වෙන්කර|වෙන් කර/i.test(cleanQ)) {
       // Find if user mentioned a specific room
       const matchedRoom = rooms.find((r) =>
-        q.includes(r.name.toLowerCase()) || (r.slug && q.includes(r.slug.toLowerCase()))
+        cleanQ.includes(r.name.toLowerCase()) || (r.slug && cleanQ.includes(r.slug.toLowerCase()))
       ) || rooms[0];
 
       cards.push({
@@ -132,15 +136,31 @@ export async function POST(req: NextRequest) {
           })),
         },
       });
-    } else if (/itinerary|day\s*plan|hiking\s*circuit|plan\s*(a\s*)?(stay|trip|tour)|චාරිකා\s*සැලැස්ම/i.test(q)) {
-      const nights = /1\s*(night|රාත්‍රී)|one\s*night/i.test(q) ? 1 : /3|three/i.test(q) ? 3 : 2;
+    } else if (/itinerary|day\s*plan|දින\s*\d+|දින\s*2|දින\s*3|දින\s*1|චාරිකාව|සැලැස්ම|චාරිකා\s*සැලැස්ම|stay\s*plan/i.test(cleanQ)) {
+      const nights = /1\s*(night|රාත්‍රී)|one\s*night|දින\s*1/i.test(cleanQ) ? 1 : /3|three|දින\s*3/i.test(cleanQ) ? 3 : 2;
       cards.push({
         type: "itinerary",
         data: generateCustomItinerary(nights, activeLanguage),
       });
-    } else if (/room|rooms|tariff|rates|price|cost|කාමර|ගාස්තු/i.test(q)) {
+    } else if (/trail|hike|hiking|circuit|kukuluwa|temple|pimbura|mountain|හයිකින්|මංපෙත්|කුකුළුවා|විහාර/i.test(cleanQ)) {
+      cards.push({
+        type: "attraction",
+        data: {
+          id: "kukuluwa_temple",
+          title: activeLanguage === "si" ? "කුකුළුවා රජ මහා විහාරය (ලෙන් විහාරය)" : "Kukuluwa Raja Maha Viharaya",
+          eyebrow: activeLanguage === "si" ? "ඓතිහාසික කඳුකර මංපෙත" : "HISTORIC CAVE TEMPLE & RIDGE",
+          description:
+            activeLanguage === "si"
+              ? "මිස්ට් මවුන්ටන් සිට විනාඩි 45ක මඟපෙන්වන්නන් සහිත සුන්දර කඳුකර පා ගමනකින් ඓතිහාසික කුකුළුවා ලෙන් විහාරය, කටාරම් කෙටූ ගල් ලෙන් සහ අංශක 360 කඳුකර දසුන් නැරඹිය හැක."
+              : "A guided 45-minute mountain trail from the base to an ancient historic cave temple with panoramic valley views, ancient drip ledges, and quiet meditation rock lookouts.",
+          imageUrl: null,
+          href: "/experiences",
+          badge: "Guided Trail",
+        },
+      });
+    } else if (/room|rooms|tariff|rates|price|cost|කාමර|ගාස්තු/i.test(cleanQ)) {
       cards.push({ type: "room_list", data: roomCards.slice(0, 3) });
-    } else if (/spring|pool|water|swim|bath|දිය තටාක|නාන්න/i.test(q)) {
+    } else if (/spring|pool|water|swim|bath|දිය\s*තටාක|උල්පත්|නාන්න/i.test(cleanQ)) {
       cards.push({
         type: "attraction",
         data: {
@@ -156,23 +176,16 @@ export async function POST(req: NextRequest) {
           badge: "On Property",
         },
       });
-    } else if (/temple|kukuluwa|cave|කුකුළුවා|ලෙන් විහාර/i.test(q)) {
+    } else if (/contact|location|where|address|phone|whatsapp|drive|reach|directions|පිහිටීම|කොහොමද\s*එන්නේ|ලිපිනය|දුරකථන|පාර/i.test(cleanQ)) {
       cards.push({
-        type: "attraction",
+        type: "nav",
         data: {
-          id: "kukuluwa_temple",
-          title: activeLanguage === "si" ? "කුකුළුවා රජ මහා විහාරය" : "Kukuluwa Raja Maha Viharaya",
-          eyebrow: activeLanguage === "si" ? "ඓතිහාසික ලෙන් විහාරය" : "HISTORIC CAVE TEMPLE",
-          description:
-            activeLanguage === "si"
-              ? "මනරම් කඳුකර මිටියාවත සහ ලෙන් විහාර පරිශ්‍රය වෙත විනාඩි 45ක මඟපෙන්වන්නන් සහිත පා ගමන."
-              : "Ancient cave temple with panoramic mountain valley views, drip ledges, and quiet meditation rock lookouts. Guided 45-minute mountain trail from the base.",
-          imageUrl: null,
-          href: "/experiences",
-          badge: "45 min trail",
+          label: activeLanguage === "si" ? "සම්බන්ධතා සහ මාර්ග විස්තර" : "Contact & Google Maps",
+          href: "/contact",
+          description: MIST_MOUNTAIN_FACTS.distanceFromColombo,
         },
       });
-    } else if (/group|corporate|team|event|outing|company|සමූහ|ආයතනික/i.test(q)) {
+    } else if (/group|corporate|team|event|outing|company|සමූහ|ආයතනික/i.test(cleanQ)) {
       cards.push({
         type: "booking_flow",
         data: {

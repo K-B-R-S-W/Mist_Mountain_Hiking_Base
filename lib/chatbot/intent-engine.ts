@@ -11,12 +11,18 @@ export function processFallbackIntent(options: {
   history?: Array<{ role: string; content: string }>;
 }): ChatApiResponse {
   const { userMessage, rooms, settings, language, history = [] } = options;
-  const q = userMessage.toLowerCase().trim();
+
+  // Clean emojis and normalize text for robust pattern matching
+  const rawQ = userMessage.trim();
+  const cleanQ = rawQ
+    .replace(/[\u{1F300}-\u{1F9FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu, "")
+    .toLowerCase()
+    .trim();
 
   const isSinhala =
     language === "si" ||
-    /[\u0D80-\u0DFF]/.test(userMessage) ||
-    /^(oya|mata|kohomada|monawada|kamara|ganan|dawas|kiyada|kauda|kawda)/i.test(q);
+    /[\u0D80-\u0DFF]/.test(rawQ) ||
+    /^(oya|mata|kohomada|monawada|kamara|ganan|dawas|kiyada|kauda|kawda)/i.test(cleanQ);
 
   const activeLang: LanguageCode = isSinhala ? "si" : "en";
 
@@ -41,10 +47,10 @@ export function processFallbackIntent(options: {
     /who are you|what are you|about you|කවුද|ඔබ කවුද|oya\s*kawda|oya\s*kauda/i.test(past)
   ).length;
 
-  // 1. Check for booking / reservation intent first
-  if (/book|reserve|reservation|availability|check\s*in|check\s*out|වෙන්කර/i.test(q)) {
+  // 1. Room Reservation / Availability Flow
+  if (/book|reserve|reservation|availab|check\s*in|check\s*out|වෙන්කර|වෙන් කර/i.test(cleanQ)) {
     const matchedRoom = rooms.find((r) =>
-      q.includes(r.name.toLowerCase()) || (r.slug && q.includes(r.slug.toLowerCase()))
+      cleanQ.includes(r.name.toLowerCase()) || (r.slug && cleanQ.includes(r.slug.toLowerCase()))
     ) || rooms[0];
 
     cards.push({
@@ -77,9 +83,9 @@ export function processFallbackIntent(options: {
     return { message, cards, quickReplies, language: activeLang };
   }
 
-  // 2. Multi-day stay itinerary planning
-  if (/itinerary|day\s*plan|hiking\s*circuit|plan\s*(a\s*)?(stay|trip|tour)|චාරිකා\s*සැලැස්ම/i.test(q)) {
-    const nights = /1\s*(night|රාත්‍රී)|one\s*night/i.test(q) ? 1 : /3|three/i.test(q) ? 3 : 2;
+  // 2. Multi-day Itinerary Planning
+  if (/itinerary|day\s*plan|දින\s*\d+|දින\s*2|දින\s*3|දින\s*1|චාරිකාව|සැලැස්ම|චාරිකා\s*සැලැස්ම|stay\s*plan/i.test(cleanQ)) {
+    const nights = /1\s*(night|රාත්‍රී)|one\s*night|දින\s*1/i.test(cleanQ) ? 1 : /3|three|දින\s*3/i.test(cleanQ) ? 3 : 2;
     const itinerary = generateCustomItinerary(nights, activeLang);
     cards.push({ type: "itinerary", data: itinerary });
 
@@ -96,24 +102,39 @@ export function processFallbackIntent(options: {
     return { message, cards, quickReplies, language: activeLang };
   }
 
-  // 3. Room tariffs and listings
-  if (/room|rooms|tariff|rates|price|cost|කාමර|ගාස්තු/i.test(q)) {
-    cards.push({ type: "room_list", data: roomCards.slice(0, 3) });
+  // 3. Hiking Trails & Attractions (Kukuluwa Temple, Pimbura Circuit)
+  if (/trail|hike|hiking|circuit|kukuluwa|temple|pimbura|mountain|හයිකින්|මංපෙත්|කුකුළුවා|විහාර/i.test(cleanQ)) {
+    cards.push({
+      type: "attraction",
+      data: {
+        id: "kukuluwa_temple",
+        title: activeLang === "si" ? "කුකුළුවා රජ මහා විහාරය (ලෙන් විහාරය)" : "Kukuluwa Raja Maha Viharaya",
+        eyebrow: activeLang === "si" ? "ඓතිහාසික කඳුකර මංපෙත" : "HISTORIC CAVE TEMPLE & RIDGE",
+        description:
+          activeLang === "si"
+            ? "මිස්ට් මවුන්ටන් සිට විනාඩි 45ක මඟපෙන්වන්නන් සහිත සුන්දර කඳුකර පා ගමනකින් ඓතිහාසික කුකුළුවා ලෙන් විහාරය, කටාරම් කෙටූ ගල් ලෙන් සහ අංශක 360 කඳුකර දසුන් නැරඹිය හැක."
+            : "A guided 45-minute mountain trail from the base to an ancient historic cave temple with panoramic valley views, ancient drip ledges, and quiet meditation rock lookouts.",
+        imageUrl: null,
+        href: "/experiences",
+        badge: "Guided Trail",
+      },
+    });
+
     message =
       activeLang === "si"
-        ? "මිස්ට් මවුන්ටන් හි ලබාගත හැකි සුවපහසු කාමර සහ ගාස්තු පහතින් දැක්වේ:"
-        : "Here are our current rooms and per-night tariffs:";
+        ? "මිස්ට් මවුන්ටන් අවට පිහිටි ප්‍රධානතම ඓතිහාසික හා හයිකින්ග් අත්දැකීම වන්නේ කුකුළුවා රජ මහා විහාර මංපෙත සහ පිඹුර කඳුකර චාරිකාවයි."
+        : "Our primary hiking highlights include the historic Kukuluwa Raja Maha Viharaya cave trail and the scenic Pimbura ridgeline circuit.";
 
     quickReplies =
       activeLang === "si"
-        ? ["📅 කාමරයක් වෙන්කරගන්න", "🌊 දිය තටාක", "🗺️ හයිකින් චාරිකා"]
-        : ["📅 Book a Room", "🌊 Spring Pools", "🗺️ Hiking Itinerary"];
+        ? ["🗺️ දින 2ක චාරිකා සැලැස්ම", "🌊 දිය තටාක", "📅 කාමර වෙන්කරගන්න"]
+        : ["🗺️ 2-Day Itinerary", "🌊 Spring Pools", "📅 Check Availability"];
 
     return { message, cards, quickReplies, language: activeLang };
   }
 
   // 4. Natural Spring pools
-  if (/spring|pool|water|swim|bath|දිය තටාක|නාන්න/i.test(q)) {
+  if (/spring|pool|water|swim|bath|දිය\s*තටාක|උල්පත්|නාන්න/i.test(cleanQ)) {
     cards.push({
       type: "attraction",
       data: {
@@ -143,8 +164,24 @@ export function processFallbackIntent(options: {
     return { message, cards, quickReplies, language: activeLang };
   }
 
-  // 5. Contact & Location
-  if (/contact|location|where|address|phone|whatsapp|drive|reach|කොහොමද එන්නේ|ලිපිනය|දුරකථන/i.test(q)) {
+  // 5. Rooms & Rates
+  if (/room|rooms|tariff|rates|price|cost|කාමර|ගාස්තු/i.test(cleanQ)) {
+    cards.push({ type: "room_list", data: roomCards.slice(0, 3) });
+    message =
+      activeLang === "si"
+        ? "මිස්ට් මවුන්ටන් හි ලබාගත හැකි සුවපහසු කාමර සහ ගාස්තු පහතින් දැක්වේ:"
+        : "Here are our current rooms and per-night tariffs:";
+
+    quickReplies =
+      activeLang === "si"
+        ? ["📅 කාමරයක් වෙන්කරගන්න", "🌊 දිය තටාක", "🗺️ හයිකින් චාරිකා"]
+        : ["📅 Book a Room", "🌊 Spring Pools", "🗺️ Hiking Itinerary"];
+
+    return { message, cards, quickReplies, language: activeLang };
+  }
+
+  // 6. Location & Contact
+  if (/contact|location|where|address|phone|whatsapp|drive|reach|directions|පිහිටීම|කොහොමද\s*එන්නේ|ලිපිනය|දුරකථන|පාර/i.test(cleanQ)) {
     cards.push({
       type: "nav",
       data: {
@@ -167,8 +204,8 @@ export function processFallbackIntent(options: {
     return { message, cards, quickReplies, language: activeLang };
   }
 
-  // 6. Identity & Anti-Repetition Fallback Responses
-  if (/who are you|what are you|about you|කවුද|ඔබ කවුද|oya\s*kawda|oya\s*kauda/i.test(q) || repeatCount > 0) {
+  // 7. Identity & Anti-Repetition Fallback Responses
+  if (/who are you|what are you|about you|කවුද|ඔබ කවුද|oya\s*kawda|oya\s*kauda/i.test(cleanQ) || repeatCount > 0) {
     if (activeLang === "si") {
       const sinhalaVariations = [
         "ආයුබෝවන්! මම මිස්ට් මවුන්ටන් කඳුකර නවාතැන්පොළේ AI සහායකයා වෙමි. කාමර වෙන්කරවා ගැනීම්, ස්වාභාවික දිය තටාක, කුකුළුවා රජ මහා විහාර චාරිකා සහ ආහාර පිළිබඳ තොරතුරු ලබාගැනීමට මට උදවු කළ හැක.",
