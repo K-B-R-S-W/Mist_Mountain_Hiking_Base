@@ -58,7 +58,7 @@ export async function generateGeminiChatResponse(options: {
     parts: [{ text: options.userMessage }],
   });
 
-  const model = "gemini-2.5-flash";
+  const model = "gemini-3.6-flash";
 
   for (let i = 0; i < keys.length; i++) {
     const key = keys[i];

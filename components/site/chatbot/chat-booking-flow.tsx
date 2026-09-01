@@ -299,13 +299,16 @@ export function ChatBookingFlow({
             if (chosen) {
               setRoomName(chosen.name);
               setPricePerNightLkr(chosen.basePriceLkr);
+              if (guests > chosen.maxGuests) {
+                setGuests(chosen.maxGuests);
+              }
             }
           }}
           className="w-full rounded-md border border-black/15 bg-background px-2 py-2 text-xs text-text focus:border-primary focus:outline-hidden font-medium"
         >
           {availableRooms.map((r) => (
             <option key={r.id} value={r.id}>
-              {r.name} · {currency === "USD" ? `$${r.basePriceUsd}` : `LKR ${r.basePriceLkr.toLocaleString()}`}/nt
+              {r.name} · {currency === "USD" ? `$${r.basePriceUsd}` : `LKR ${r.basePriceLkr.toLocaleString()}`}/nt (Max {r.maxGuests} {r.maxGuests === 1 ? "guest" : "guests"})
             </option>
           ))}
         </select>
@@ -342,7 +345,13 @@ export function ChatBookingFlow({
             onChange={(e) => setGuests(Number(e.target.value))}
             className="w-full rounded-md border border-black/15 bg-background px-2 py-1.5 text-xs focus:border-primary focus:outline-hidden"
           >
-            {[1, 2, 3, 4, 5, 6, 8, 10, 15, 20].map((n) => (
+            {Array.from(
+              {
+                length:
+                  availableRooms.find((r) => r.id === roomId)?.maxGuests || 2,
+              },
+              (_, i) => i + 1
+            ).map((n) => (
               <option key={n} value={n}>
                 {n} {n === 1 ? "Guest" : "Guests"}
               </option>
