@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { Send, Mic, Sparkles } from "lucide-react";
+import { Send, Mic } from "lucide-react";
 import { LanguageCode } from "@/lib/chatbot/types";
 
 export function ChatInputBar({
@@ -20,13 +20,14 @@ export function ChatInputBar({
 
   const placeholder =
     language === "si"
-      ? "ඔබගේ පණිවිඩය මෙහි ලියන්න (හෝ මයික්‍රෆෝනය ඔබන්න)..."
-      : "Ask about rooms, trails, spring pools, or itineraries...";
+      ? "ඔබගේ පණිවිඩය මෙහි ලියන්න..."
+      : "Ask about rooms, trails, spring pools...";
 
   useEffect(() => {
     if (textareaRef.current) {
-      textareaRef.current.style.height = "auto";
-      textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 100)}px`;
+      textareaRef.current.style.height = "0px";
+      const scrollHeight = textareaRef.current.scrollHeight;
+      textareaRef.current.style.height = `${Math.min(Math.max(scrollHeight, 38), 100)}px`;
     }
   }, [input]);
 
@@ -43,31 +44,34 @@ export function ChatInputBar({
     onSendMessage(input.trim());
     setInput("");
     if (textareaRef.current) {
-      textareaRef.current.style.height = "auto";
+      textareaRef.current.style.height = "38px";
     }
   };
 
   return (
-    <div className="border-t border-black/5 bg-surface/90 p-3 backdrop-blur">
+    <div className="border-t border-black/5 bg-surface/95 p-3 backdrop-blur-md">
       <form onSubmit={handleSubmit} className="flex items-end gap-2">
-        <textarea
-          ref={textareaRef}
-          rows={1}
-          maxLength={2000}
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyDown={handleKeyDown}
-          placeholder={placeholder}
-          disabled={disabled}
-          className="max-h-24 flex-1 resize-none rounded-xl border border-black/10 bg-background px-3.5 py-2.5 text-xs text-text placeholder:text-muted/70 focus:border-primary focus:outline-hidden disabled:opacity-50"
-        />
+        <div className="relative flex-1 flex items-center rounded-xl border border-black/10 bg-background px-3 py-1 focus-within:border-primary/50 focus-within:ring-2 focus-within:ring-primary/10 transition-all shadow-2xs">
+          <textarea
+            ref={textareaRef}
+            rows={1}
+            maxLength={2000}
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={handleKeyDown}
+            placeholder={placeholder}
+            disabled={disabled}
+            className="w-full resize-none bg-transparent py-1.5 text-xs text-text placeholder:text-muted/70 focus:outline-hidden disabled:opacity-50 overflow-y-auto leading-relaxed [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+            style={{ minHeight: "34px", maxHeight: "100px" }}
+          />
+        </div>
 
         {onStartVoice ? (
           <button
             onClick={onStartVoice}
             type="button"
-            title="Switch to Voice Chat"
-            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-black/10 bg-surface text-secondary hover:bg-secondary/10 hover:text-primary transition active:scale-95"
+            title="Switch to Voice Mode"
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-black/10 bg-background text-secondary hover:bg-secondary/10 hover:text-primary transition-all active:scale-95 shadow-2xs"
           >
             <Mic className="h-4 w-4" />
           </button>
@@ -77,7 +81,7 @@ export function ChatInputBar({
           type="submit"
           disabled={!input.trim() || disabled}
           title="Send message"
-          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary text-background shadow-xs hover:bg-secondary transition active:scale-95 disabled:opacity-40"
+          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary text-background shadow-xs hover:bg-secondary transition-all active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed"
         >
           <Send className="h-4 w-4" />
         </button>
