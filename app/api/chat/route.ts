@@ -222,6 +222,7 @@ export async function POST(req: NextRequest) {
         rooms,
         settings,
         language: activeLanguage,
+        history: messages,
       });
       responseText = fallback.message;
       if (cards.length === 0 && fallback.cards) {

@@ -1,7 +1,6 @@
 import { RoomSummary, SiteSettings } from "@/lib/types/domain";
 import { MIST_MOUNTAIN_FACTS, USD_EXCHANGE_RATE } from "./knowledge-base";
 import { generateCustomItinerary } from "./itinerary-generator";
-import { SITE_NAV_ROUTES } from "./navigation-map";
 import { CardPayload, ChatApiResponse, LanguageCode, RoomCardPayload } from "./types";
 
 export function processFallbackIntent(options: {
@@ -9,14 +8,15 @@ export function processFallbackIntent(options: {
   rooms: RoomSummary[];
   settings: SiteSettings;
   language: LanguageCode;
+  history?: Array<{ role: string; content: string }>;
 }): ChatApiResponse {
-  const { userMessage, rooms, settings, language } = options;
+  const { userMessage, rooms, settings, language, history = [] } = options;
   const q = userMessage.toLowerCase().trim();
 
   const isSinhala =
     language === "si" ||
     /[\u0D80-\u0DFF]/.test(userMessage) ||
-    /^(oya|mata|kohomada|monawada|kamara|ganan|dawas|kiyada)/i.test(q);
+    /^(oya|mata|kohomada|monawada|kamara|ganan|dawas|kiyada|kauda|kawda)/i.test(q);
 
   const activeLang: LanguageCode = isSinhala ? "si" : "en";
 
@@ -34,6 +34,12 @@ export function processFallbackIntent(options: {
   const cards: CardPayload[] = [];
   let message = "";
   let quickReplies: string[] = [];
+
+  // Count past similar greetings/questions to ensure anti-repetition
+  const userPastQuestions = history.filter((m) => m.role === "user").map((m) => m.content.toLowerCase());
+  const repeatCount = userPastQuestions.filter((past) =>
+    /who are you|what are you|about you|කවුද|ඔබ කවුද|oya\s*kawda|oya\s*kauda/i.test(past)
+  ).length;
 
   // 1. Check for booking / reservation intent first
   if (/book|reserve|reservation|availability|check\s*in|check\s*out|වෙන්කර/i.test(q)) {
@@ -71,6 +77,7 @@ export function processFallbackIntent(options: {
     return { message, cards, quickReplies, language: activeLang };
   }
 
+  // 2. Multi-day stay itinerary planning
   if (/itinerary|day\s*plan|hiking\s*circuit|plan\s*(a\s*)?(stay|trip|tour)|චාරිකා\s*සැලැස්ම/i.test(q)) {
     const nights = /1\s*(night|රාත්‍රී)|one\s*night/i.test(q) ? 1 : /3|three/i.test(q) ? 3 : 2;
     const itinerary = generateCustomItinerary(nights, activeLang);
@@ -89,7 +96,8 @@ export function processFallbackIntent(options: {
     return { message, cards, quickReplies, language: activeLang };
   }
 
-  if (/room|rooms|stay|sleep|rate|price|tariff|cost|bed|කාමර|ගාස්තු/i.test(q)) {
+  // 3. Room tariffs and listings
+  if (/room|rooms|tariff|rates|price|cost|කාමර|ගාස්තු/i.test(q)) {
     cards.push({ type: "room_list", data: roomCards.slice(0, 3) });
     message =
       activeLang === "si"
@@ -104,6 +112,7 @@ export function processFallbackIntent(options: {
     return { message, cards, quickReplies, language: activeLang };
   }
 
+  // 4. Natural Spring pools
   if (/spring|pool|water|swim|bath|දිය තටාක|නාන්න/i.test(q)) {
     cards.push({
       type: "attraction",
@@ -134,6 +143,7 @@ export function processFallbackIntent(options: {
     return { message, cards, quickReplies, language: activeLang };
   }
 
+  // 5. Contact & Location
   if (/contact|location|where|address|phone|whatsapp|drive|reach|කොහොමද එන්නේ|ලිපිනය|දුරකථන/i.test(q)) {
     cards.push({
       type: "nav",
@@ -157,10 +167,37 @@ export function processFallbackIntent(options: {
     return { message, cards, quickReplies, language: activeLang };
   }
 
+  // 6. Identity & Anti-Repetition Fallback Responses
+  if (/who are you|what are you|about you|කවුද|ඔබ කවුද|oya\s*kawda|oya\s*kauda/i.test(q) || repeatCount > 0) {
+    if (activeLang === "si") {
+      const sinhalaVariations = [
+        "ආයුබෝවන්! මම මිස්ට් මවුන්ටන් කඳුකර නවාතැන්පොළේ AI සහායකයා වෙමි. කාමර වෙන්කරවා ගැනීම්, ස්වාභාවික දිය තටාක, කුකුළුවා රජ මහා විහාර චාරිකා සහ ආහාර පිළිබඳ තොරතුරු ලබාගැනීමට මට උදවු කළ හැක.",
+        "නැවතත් මගෙන් අහනවාද? 😊 මම මිස්ට් මවුන්ටන් හි ඔබගේ ඩිජිටල් සහායකයා. අපගේ පිරිසිදු උල්පත් දිය තටාක හෝ කාමර ගාස්තු ගැන විස්තර දැනගන්න කැමතිද?",
+        "මම තවමත් ඔබ වෙනුවෙන් මෙහි සූදානමින් සිටිමි! ඔබට අවශ්‍ය ඕනෑම වේලාවක කාමරයක් වෙන්කරවා ගැනීමට හෝ කඳුකර චාරිකාවක් සැලසුම් කිරීමට මට කියන්න.",
+        "ඔබට උදවු කිරීමට මම සතුටින් සූදානම්! අද දින ඔබ බලාපොරොත්තු වන්නේ කාමර වෙන්කරගැනීමක්ද නැතහොත් හයිකින්ග් විස්තරද?",
+      ];
+      const safeIdx = Math.min(repeatCount, sinhalaVariations.length - 1);
+      message = sinhalaVariations[safeIdx] || sinhalaVariations[0] || "";
+      quickReplies = ["📅 කාමර වෙන්කරගන්න", "🗺️ දින 2ක චාරිකාව", "🌊 දිය තටාක", "📍 පිහිටීම"];
+    } else {
+      const englishVariations = [
+        "Welcome to Mist Mountain Hiking Base! I can help you with room bookings, our 2 natural spring pools, the Pimbura hiking circuit, authentic dining, and directions. How may I assist your stay?",
+        "Asking again? 😊 I'm still your Mist Mountain AI Concierge! Would you like to check out our spring pools, hiking trails, or room availability?",
+        "Still here and ready whenever you are! Let me know if you want to book a room, plan an itinerary, or chat with our team on WhatsApp.",
+        "Always here to help you experience the best of Mist Mountain! What shall we explore next?",
+      ];
+      const safeIdx = Math.min(repeatCount, englishVariations.length - 1);
+      message = englishVariations[safeIdx] || englishVariations[0] || "";
+      quickReplies = ["📅 Book a Stay", "🗺️ 2-Day Itinerary", "🌊 Spring Pools", "📍 Location & Route"];
+    }
+    return { message, cards, quickReplies, language: activeLang };
+  }
+
+  // General default greeting / helper
   message =
     activeLang === "si"
-      ? `ආයුබෝවන්! මම මිස්ට් මවුන්ටන් කඳුකර නවාතැන්පොළේ AI සහායකයා වෙමි. කාමර වෙන්කරවා ගැනීම්, ස්වාභාවික දිය තටාක, කුකුළුවා රජ මහා විහාර චාරිකා සහ ආහාර පිළිබඳ තොරතුරු ලබාගැනීමට මට උදවු කළ හැක.`
-      : `Welcome to Mist Mountain Hiking Base! I can help you with room bookings, our 2 natural spring pools, the Pimbura hiking circuit, authentic dining, and directions. How may I assist your stay?`;
+      ? "මිස්ට් මවුන්ටන් වෙත සාදරයෙන් පිළිගනිමු! කාමර වෙන්කරවා ගැනීම්, ස්වාභාවික දිය තටාක හෝ හයිකින්ග් චාරිකා ගැන ඔබට දැනගැනීමට අවශ්‍ය කුමක්ද?"
+      : "Welcome to Mist Mountain! Feel free to ask about room availability, our 2 spring pools, guided trails, or dining options.";
 
   quickReplies =
     activeLang === "si"

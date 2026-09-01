@@ -110,12 +110,22 @@ export function ChatPanel({ onClose }: { onClose: () => void }) {
   const handleSendMessage = async (text: string) => {
     if (!text.trim() || isTyping) return;
 
+    const isSinhalaInput =
+      /[\u0D80-\u0DFF]/.test(text) ||
+      /^(oya|mata|kohomada|monawada|kamara|ganan|dawas|kiyada|inna|enne|subha|oya\s+kauda|oyaa)/i.test(text.trim());
+    const detectedLang: LanguageCode = isSinhalaInput ? "si" : "en";
+
+    // Auto-update header language state immediately
+    if (detectedLang !== language) {
+      setLanguage(detectedLang);
+    }
+
     const userMessage: ChatMessage = {
       id: "user-" + Date.now(),
       role: "user",
       content: text,
       createdAt: new Date().toISOString(),
-      language,
+      language: detectedLang,
     };
 
     const newHistory = [...messages, userMessage];
@@ -129,7 +139,7 @@ export function ChatPanel({ onClose }: { onClose: () => void }) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           messages: newHistory.map((m) => ({ role: m.role, content: m.content })),
-          language,
+          language: detectedLang,
           currency,
           sessionId,
         }),

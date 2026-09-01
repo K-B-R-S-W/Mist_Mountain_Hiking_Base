@@ -46,7 +46,7 @@ export function ChatHeader({
           title="Switch Language (English / Sinhala)"
           className="rounded-lg border border-black/10 bg-background px-2.5 py-1 text-xs font-semibold text-primary shadow-2xs hover:border-primary/30 hover:bg-black/5 active:scale-95 transition-all"
         >
-          {language === "en" ? "සිංහල" : "EN"}
+          {language === "si" ? "සිංහල" : "ENG"}
         </button>
 
         {/* Currency Toggle */}
