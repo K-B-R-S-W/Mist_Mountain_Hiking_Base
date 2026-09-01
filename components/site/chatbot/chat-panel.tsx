@@ -26,14 +26,36 @@ const INITIAL_GREETING_EN =
 const INITIAL_GREETING_SI =
   "**මිස්ට් මවුන්ටන් හයිකින්ග් බේස්** වෙත ඔබව සාදරයෙන් පිළිගනිමු! 🌿\n\nකාමර වෙන්කරවා ගැනීම්, ස්වාභාවික උල්පත් දිය තටාක 2, කුකුළුවා රජ මහා විහාර චාරිකා හෝ කඳුකර චාරිකා සැලසුම් පිළිබඳ තොරතුරු ලබාගැනීමට මට හැකිය. අද ඔබට උදවු කළ හැක්කේ කෙසේද?";
 
+const DEFAULT_QUICK_REPLIES_EN = [
+  "📅 Check Availability",
+  "🗺️ 2-Day Itinerary",
+  "🌊 Spring Pools",
+  "📍 Directions",
+];
+
+const DEFAULT_QUICK_REPLIES_SI = [
+  "📅 කාමර වෙන්කරගන්න",
+  "🗺️ දින 2ක චාරිකාව",
+  "🌊 දිය තටාක",
+  "📍 පිහිටීම",
+];
+
 export function ChatPanel({ onClose }: { onClose: () => void }) {
   const router = useRouter();
 
   const [sessionId, setSessionId] = useState<string>("init");
   const [language, setLanguage] = useState<LanguageCode>("en");
   const [currency, setCurrency] = useState<CurrencyCode>("LKR");
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [quickReplies, setQuickReplies] = useState<string[]>([]);
+  const [messages, setMessages] = useState<ChatMessage[]>([
+    {
+      id: "init-welcome",
+      role: "assistant",
+      content: INITIAL_GREETING_EN,
+      createdAt: new Date().toISOString(),
+      quickReplies: DEFAULT_QUICK_REPLIES_EN,
+    },
+  ]);
+  const [quickReplies, setQuickReplies] = useState<string[]>(DEFAULT_QUICK_REPLIES_EN);
   const [isTyping, setIsTyping] = useState(false);
   const [isVoiceMode, setIsVoiceMode] = useState(false);
   const [voiceState, setVoiceState] = useState<VoiceState>("idle");
@@ -50,18 +72,26 @@ export function ChatPanel({ onClose }: { onClose: () => void }) {
     const stored = loadStoredChatState();
     if (stored && stored.messages.length > 0) {
       setMessages(stored.messages);
-      setLanguage(stored.language || "en");
+      const activeLang = stored.language || "en";
+      setLanguage(activeLang);
       setCurrency(stored.currency || "LKR");
+
+      const lastAssistantMsg = [...stored.messages].reverse().find((m) => m.role === "assistant");
+      if (lastAssistantMsg?.quickReplies && lastAssistantMsg.quickReplies.length > 0) {
+        setQuickReplies(lastAssistantMsg.quickReplies);
+      } else {
+        setQuickReplies(activeLang === "si" ? DEFAULT_QUICK_REPLIES_SI : DEFAULT_QUICK_REPLIES_EN);
+      }
     } else {
       const initialMsg: ChatMessage = {
         id: "init-welcome",
         role: "assistant",
         content: INITIAL_GREETING_EN,
         createdAt: new Date().toISOString(),
-        quickReplies: ["📅 Check Availability", "🗺️ 2-Day Itinerary", "🌊 Spring Pools", "📍 Directions"],
+        quickReplies: DEFAULT_QUICK_REPLIES_EN,
       };
       setMessages([initialMsg]);
-      setQuickReplies(initialMsg.quickReplies ?? []);
+      setQuickReplies(DEFAULT_QUICK_REPLIES_EN);
     }
   }, []);
 
