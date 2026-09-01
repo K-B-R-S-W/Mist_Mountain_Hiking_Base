@@ -100,6 +100,18 @@ export async function submitChatbotBooking(
 
   if (insertError || !bookingRow) {
     console.error("Chatbot booking insertion error:", insertError);
+    if (
+      insertError?.code === "23P01" ||
+      insertError?.message?.includes("overlapping") ||
+      insertError?.message?.includes("exclude") ||
+      insertError?.message?.includes("conflict")
+    ) {
+      return {
+        status: "error",
+        message: "This room was just booked by another guest for the selected dates. Please choose different dates or another room.",
+        isUnavailable: true,
+      };
+    }
     return {
       status: "error",
       message: "Could not save your reservation. Please try again or reach out via WhatsApp.",

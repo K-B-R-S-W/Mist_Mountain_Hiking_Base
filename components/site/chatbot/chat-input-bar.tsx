@@ -53,6 +53,7 @@ export function ChatInputBar({
         <textarea
           ref={textareaRef}
           rows={1}
+          maxLength={2000}
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={handleKeyDown}
