@@ -1,0 +1,395 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #163126; /* deep forest, from the tin roof */
+  --color-secondary: #284a3a; /* moss */
+  --color-accent: #b06a3c; /* clay / terracotta */
+  --color-background: #f8f6f2; /* warm cream page canvas */
+  --color-surface: #ffffff; /* cards lift off the cream */
+  --color-text: #1d1d1d;
+  --color-muted: #6b6b6b;
+
+  --font-display: "Fraunces", Georgia, serif;
+  --font-body: "Work Sans", "Helvetica Neue", sans-serif;
+
+  --radius-card: 12px;
+  --radius-card-inner: 8px; /* concentric: 12 - 8px padding = 4, adjust per component */
+}
+
+/*
+ * Motion tokens — single source of truth for timing/easing, referenced
+ * directly by CSS transitions below and mirrored in lib/motion/tokens.ts
+ * for Motion (motion/react) components. Keep both in sync.
+ */
+:root {
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
+
+  --motion-fast: 160ms;
+  --motion-base: 220ms;
+  --motion-slow: 420ms;
+  --motion-cinematic: 700ms;
+}
+
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  scroll-behavior: smooth;
+  /* Mobile browsers (esp. iOS Safari) resize the viewport as chrome
+     shows/hides; without this, 100vw can trigger a horizontal scrollbar. */
+  overflow-x: hidden;
+}
+
+body {
+  background: var(--color-background);
+  color: var(--color-text);
+  font-family: var(--font-body);
+  overflow-x: hidden;
+}
+
+/* Any stray wide element (image, table, iframe) is clipped instead of
+   pushing the page into horizontal scroll on small screens. */
+img,
+video,
+iframe,
+svg {
+  max-width: 100%;
+}
+
+/* Dynamic viewport height helpers — 100vh includes mobile browser chrome
+   and causes hero/full-height sections to be taller than the visible
+   screen. Use these instead of raw vh for any full-screen mobile section. */
+.h-screen-safe {
+  height: 100vh;
+  height: 100svh;
+}
+
+.min-h-screen-safe {
+  min-height: 100vh;
+  min-height: 100svh;
+}
+
+/* Bottom safe-area for iOS home-indicator devices, used by the sticky
+   mobile booking bar and mobile drawers. */
+.pb-safe {
+  padding-bottom: max(1rem, env(safe-area-inset-bottom));
+}
+
+.pt-safe {
+  padding-top: env(safe-area-inset-top);
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-display);
+  text-wrap: balance;
+}
+
+p,
+li {
+  text-wrap: pretty;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/*
+ * Signature element: a topographic contour-line motif used as a quiet
+ * section divider / background texture. Ties to "mountain" without
+ * relying on stock photography or a generic gradient.
+ * Usage: <div class="contour-divider" />
+ */
+.contour-divider {
+  height: 64px;
+  background-image: repeating-radial-gradient(
+    circle at 20% 40%,
+    transparent 0,
+    transparent 18px,
+    rgba(22, 49, 38, 0.06) 19px,
+    rgba(22, 49, 38, 0.06) 20px
+  );
+  background-color: var(--color-background);
+}
+
+.panel-accent-tint {
+  background-color: color-mix(in srgb, var(--color-accent) 10%, var(--color-background));
+}
+
+.panel-secondary-tint {
+  background-color: color-mix(in srgb, var(--color-secondary) 8%, var(--color-background));
+}
+
+/*
+ * Location-section fallback for the topographic 3D scene (see
+ * components/site/location-panel.tsx). Same ink and restraint as
+ * .contour-divider, but scaled up into a large atmospheric background
+ * rather than a thin section-divider band — a different job, so a
+ * distinct variant rather than reusing the divider outright. Shown on
+ * mobile, under prefers-reduced-motion, and when WebGL is unavailable.
+ */
+.location-contours {
+  background-image: repeating-radial-gradient(
+    circle at 72% 28%,
+    transparent 0,
+    transparent 42px,
+    rgba(40, 74, 58, 0.05) 43px,
+    rgba(40, 74, 58, 0.05) 44px
+  );
+}
+
+.page-shell {
+  margin-inline: auto;
+  width: min(1120px, calc(100% - 3rem));
+}
+
+.card {
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: var(--radius-card);
+  background: var(--color-surface);
+  padding: 1rem;
+}
+
+.eyebrow {
+  font-size: 0.75rem;
+  letter-spacing: 0.2em;
+  color: var(--color-muted);
+}
+
+.badge {
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 999px;
+  padding: 0.25rem 0.65rem;
+  font-size: 0.75rem;
+}
+
+.btn-primary {
+  border-radius: 0.5rem;
+  background: var(--color-primary);
+  color: var(--color-background);
+  font-size: 0.875rem;
+  font-weight: 500;
+  padding: 0.65rem 1rem;
+}
+
+.btn-primary:disabled {
+  opacity: 0.35;
+  pointer-events: none;
+}
+
+.btn-secondary {
+  border-radius: 0.5rem;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-size: 0.8rem;
+  font-weight: 500;
+  padding: 0.4rem 0.75rem;
+}
+
+.btn-secondary:disabled {
+  opacity: 0.35;
+  pointer-events: none;
+}
+
+.btn-danger {
+  border-radius: 0.5rem;
+  border: 1px solid rgba(185, 28, 28, 0.3);
+  background: transparent;
+  color: #b91c1c;
+  font-size: 0.8rem;
+  font-weight: 500;
+  padding: 0.4rem 0.75rem;
+}
+
+.link-inline {
+  color: var(--color-accent);
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+/*
+ * Desktop nav link — color transition (unchanged behavior) plus a
+ * transform-based underline that grows from the link's own left edge.
+ * Gated behind hover-capable pointers so it never triggers a stuck
+ * hover state on touch. Covered by the global prefers-reduced-motion
+ * rule above (it targets *::after too), so no extra override needed.
+ */
+.nav-link {
+  position: relative;
+  transition: color var(--motion-fast) var(--ease-out);
+}
+
+.nav-link::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -3px;
+  height: 1px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform var(--motion-base) var(--ease-out);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .nav-link:hover::after {
+    transform: scaleX(1);
+  }
+}
+
+.form-field {
+  display: grid;
+  gap: 0.35rem;
+  font-size: 0.875rem;
+  color: var(--color-muted);
+}
+
+.form-input {
+  width: 100%;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: 0.45rem;
+  background: white;
+  color: var(--color-text);
+  padding: 0.55rem 0.7rem;
+  font-size: 0.875rem;
+}
+
+.form-input:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 1px;
+}
+
+/*
+ * Rendered output of the About-page rich text fields (public site) and
+ * the live editor surface itself (admin). Kept as one small hand-written
+ * block instead of pulling in @tailwindcss/typography for five tag
+ * types — see lib/validation/sanitize-rich-text.ts for the matching
+ * allowlist these rules are styling.
+ */
+.rich-text p {
+  margin: 0.75em 0;
+}
+
+.rich-text p:first-child {
+  margin-top: 0;
+}
+
+.rich-text p:last-child {
+  margin-bottom: 0;
+}
+
+.rich-text h3 {
+  margin: 1em 0 0.4em;
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  color: var(--color-text);
+}
+
+.rich-text ul,
+.rich-text ol {
+  margin: 0.75em 0;
+  padding-left: 1.25em;
+}
+
+.rich-text ul {
+  list-style: disc;
+}
+
+.rich-text ol {
+  list-style: decimal;
+}
+
+.rich-text li {
+  margin: 0.3em 0;
+}
+
+.rich-text strong {
+  color: var(--color-text);
+  font-weight: 600;
+}
+
+.rte-shell {
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: 0.45rem;
+  background: white;
+  overflow: hidden;
+}
+
+.rte-toolbar {
+  display: flex;
+  gap: 0.25rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  background: rgba(0, 0, 0, 0.02);
+  padding: 0.35rem;
+}
+
+.rte-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.9rem;
+  height: 1.9rem;
+  border-radius: 0.35rem;
+  color: var(--color-muted);
+}
+
+.rte-btn:hover {
+  background: rgba(0, 0, 0, 0.06);
+  color: var(--color-text);
+}
+
+.rte-btn.is-active {
+  background: var(--color-primary);
+  color: var(--color-background);
+}
+
+.rich-text-input {
+  min-height: 8rem;
+  padding: 0.65rem 0.75rem;
+  font-size: 0.875rem;
+  color: var(--color-text);
+}
+
+.rich-text-input:focus {
+  outline: none;
+}
+
+.rich-text-input p {
+  margin: 0.6em 0;
+}
+
+.rich-text-input ul,
+.rich-text-input ol {
+  padding-left: 1.25em;
+}
+
+.rich-text-input ul {
+  list-style: disc;
+}
+
+.rich-text-input ol {
+  list-style: decimal;
+}
+
+/* Tiptap's Placeholder extension renders this on the first empty node. */
+.rich-text-input p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  color: var(--color-muted);
+  opacity: 0.6;
+  pointer-events: none;
+}
