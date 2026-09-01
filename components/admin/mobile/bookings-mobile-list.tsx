@@ -15,7 +15,18 @@ export function BookingsMobileList({ bookings }: { bookings: BookingInquiry[] })
     <div className="flex flex-col gap-3 md:hidden">
       {bookings.map((booking) => (
         <div key={booking.id} className="card">
-          <p className="font-medium">{booking.guestName}</p>
+          <div className="flex items-center justify-between">
+            <p className="font-medium">{booking.guestName}</p>
+            {booking.source === "chatbot" ? (
+              <span className="rounded bg-emerald-100 px-1.5 py-0.5 text-[10px] font-semibold text-emerald-800">
+                Chatbot
+              </span>
+            ) : booking.source === "booking_com" ? (
+              <span className="rounded bg-blue-100 px-1.5 py-0.5 text-[10px] font-semibold text-blue-800">
+                Booking.com
+              </span>
+            ) : null}
+          </div>
           <p className="text-xs text-muted">{booking.email}</p>
           {booking.phone ? <p className="text-xs text-muted">{booking.phone}</p> : null}
 

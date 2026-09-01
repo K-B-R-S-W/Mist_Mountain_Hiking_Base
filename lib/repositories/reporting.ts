@@ -142,12 +142,14 @@ export async function getSourceBreakdown(
   let direct = 0;
   let phone = 0;
   let booking_com = 0;
+  let chatbot = 0;
 
   for (const b of bookings ?? []) {
     if (b.source === "direct") direct++;
     if (b.source === "phone") phone++;
     if (b.source === "booking_com") booking_com++;
+    if (b.source === "chatbot") chatbot++;
   }
 
-  return { direct, phone, booking_com };
+  return { direct, phone, booking_com, chatbot };
 }

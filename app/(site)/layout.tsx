@@ -6,6 +6,7 @@ import { CurtainProvider } from "@/lib/motion/curtain-context";
 import { PageCurtain } from "@/components/site/motion/page-curtain";
 import { TransitionLink } from "@/components/site/motion/transition-link";
 import { SiteMain } from "@/components/site/motion/site-main";
+import { ChatWidget } from "@/components/site/chatbot/chat-widget";
 
 const NAV = [
   { href: "/about", label: "About" },
@@ -176,6 +177,8 @@ export default async function SiteLayout({
         >
           Check availability
         </TransitionLink>
+        {/* Persistent AI Concierge Chatbot Widget */}
+        <ChatWidget />
       </div>
     </CurtainProvider>
   );

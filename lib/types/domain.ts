@@ -77,9 +77,51 @@ export type BookingInquiry = {
   /** Booking channel. Present on all rows post-0004 migration (NOT NULL DEFAULT 'direct').
    *  Optional here since the web side never writes it and pre-migration reads
    *  may theoretically miss it if types are regenerated before the migration runs. */
-  source?: "direct" | "phone" | "booking_com" | null;
+  source?: "direct" | "phone" | "booking_com" | "chatbot" | null;
   /** Booking.com reservation ID, populated by the Android Gmail sync. Not written by the web app. */
   bookingRef?: string | null;
+};
+
+export type ChatLead = {
+  id: string;
+  sessionId: string | null;
+  guestName: string | null;
+  email: string | null;
+  phone: string | null;
+  roomId: string | null;
+  roomName?: string | null;
+  checkIn: string | null;
+  checkOut: string | null;
+  guests: number | null;
+  type: "abandoned_booking" | "group_inquiry" | "general_lead";
+  notes: string | null;
+  metadata: Record<string, unknown>;
+  status: "new" | "contacted" | "converted" | "archived";
+  createdAt: string;
+};
+
+export type ChatWaitlist = {
+  id: string;
+  roomId: string | null;
+  roomName?: string | null;
+  guestName: string;
+  contactInfo: string;
+  checkIn: string | null;
+  checkOut: string | null;
+  guests: number | null;
+  notes: string | null;
+  status: "pending" | "notified" | "expired" | "archived";
+  createdAt: string;
+};
+
+export type ChatUnansweredLog = {
+  id: string;
+  question: string;
+  category: string;
+  language: string;
+  sessionId: string | null;
+  isResolved: boolean;
+  createdAt: string;
 };
 
 export type SiteSettings = {
@@ -146,6 +188,7 @@ export type ReportingSourceBreakdown = {
   direct: number;
   phone: number;
   booking_com: number;
+  chatbot: number;
 };
 
 export type ReportingData = {
@@ -153,3 +196,4 @@ export type ReportingData = {
   revenue: ReportingRevenue;
   sourceBreakdown: ReportingSourceBreakdown;
 };
+

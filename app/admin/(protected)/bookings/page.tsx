@@ -38,7 +38,18 @@ export default async function AdminBookingsPage() {
             {bookings.map((booking) => (
               <tr key={booking.id} className="bg-surface">
                 <td className="rounded-l-md px-3 py-3 align-top">
-                  <p className="font-medium">{booking.guestName}</p>
+                  <div className="flex items-center gap-2">
+                    <p className="font-medium">{booking.guestName}</p>
+                    {booking.source === "chatbot" ? (
+                      <span className="rounded bg-emerald-100 px-1.5 py-0.5 text-[10px] font-semibold text-emerald-800">
+                        Chatbot
+                      </span>
+                    ) : booking.source === "booking_com" ? (
+                      <span className="rounded bg-blue-100 px-1.5 py-0.5 text-[10px] font-semibold text-blue-800">
+                        Booking.com
+                      </span>
+                    ) : null}
+                  </div>
                   <p className="text-xs text-muted">{booking.email}</p>
                   {booking.phone ? <p className="text-xs text-muted">{booking.phone}</p> : null}
                 </td>

@@ -1,0 +1,71 @@
+export const MIST_MOUNTAIN_FACTS = {
+  name: "Mist Mountain Hiking Base",
+  sinhalaName: "මිස්ට් මවුන්ටන් හයිකින්ග් බේස්",
+  location: "Udahawaththa Bungalow, Karavita Road, Pimbura 70470, Sri Lanka",
+  sinhalaLocation: "උදහාවත්ත බංගලාව, කරවිට පාර, පිඹුර, ශ්‍රී ලංකාව",
+  distanceFromColombo: "Approximately 2.5 hours (~85 km) from Colombo via the Horana - Ratnapura corridor / Kiriella - Pimbura route.",
+  checkInTime: "2:00 PM (14:00)",
+  checkOutTime: "11:00 AM (11:00)",
+  climate: "Cool mountain mist, lush rainforest canopy, refreshing tropical rainfall. Light sweater and rain jacket/hiking boots recommended.",
+  dining: {
+    en: "Authentic Sri Lankan village meals cooked with fresh local spices and vegetables, morning Ceylon tea tasting, fresh king coconut picked directly from the plantation, and custom campfire barbecue options on request.",
+    si: "නැවුම් ගම්මාන කුළුබඩු සහ එළවළු යොදා සකසන ලද සාම්ප්‍රදායික ශ්‍රී ලාංකික ආහාර, උදෑසන සිලෝන් තේ රස බැලීම, වත්තෙන් ම කපා දෙන තැඹිලි සහ ඉල්ලීම පරිදි කැම්ප්ෆයර් බාබකියු පහසුකම්.",
+  },
+  springPools: {
+    en: "Two natural, chemical-free, gravity-fed spring-fed mountain pools. Overflow water gently irrigates the surrounding cinnamon and coconut trees instead of being wasted.",
+    si: "කිසිදු රසායනික ද්‍රව්‍යයක් නොමැතිව, ස්වාභාවිකව ගලා එන පිරිසිදු උල්පත් දිය තටාක 2ක්. තටාකවලින් පිටාර ගලන ජලය කුරුඳු සහ පොල් වගාවන් සඳහා ස්වභාවිකව යොදා ගැනේ.",
+  },
+  plantation: {
+    en: "A working 10+ acre agro-tourism plantation of high-elevation Ceylon tea, authentic Ceylon cinnamon, black pepper vines, and coconut palms. Guests can participate in morning tea leaf plucking and traditional cinnamon peeling demonstrations.",
+    si: "තේ, කුරුඳු, ගම්මිරිස් සහ පොල් වගා කළ සක්‍රීය අක්කර 10කට වැඩි කෘෂි සංචාරක වත්තක්. උදෑසන තේ දළු නෙළීම සහ සාම්ප්‍රදායික කුරුඳු තැලීමේ අත්දැකීම් ලබාගත හැක.",
+  },
+  attractions: [
+    {
+      id: "spring_pools",
+      nameEn: "Two Natural Spring Pools",
+      nameSi: "ස්වාභාවික උල්පත් දිය තටාක",
+      descEn: "100% pure mountain spring water, gravity-fed and revitalizing after a hike.",
+      descSi: "කඳුකර උල්පත් ජලයෙන් පිරි ස්වභාවික දිය තටාක.",
+      type: "onsite",
+      distance: "0 km (On property)",
+    },
+    {
+      id: "plantation",
+      nameEn: "Working Tea & Spice Plantation",
+      nameSi: "තේ සහ කුළුබඩු වගා භූමිය",
+      descEn: "Interactive agro-tourism trail across tea hills, pepper trees, and cinnamon peeling.",
+      descSi: "තේ, කුරුඳු හා ගම්මිරිස් වගා අත්දැකීම්.",
+      type: "onsite",
+      distance: "0 km (On property)",
+    },
+    {
+      id: "kukuluwa_temple",
+      nameEn: "Kukuluwa Raja Maha Viharaya (Cave Temple)",
+      nameSi: "කුකුළුවා රජ මහා විහාරය (ලෙන් විහාරය)",
+      descEn: "Ancient historic cave temple with panoramic mountain valley views, drip ledges, and quiet meditation rock lookouts.",
+      descSi: "ඓතිහාසික ලෙන් විහාරය සහ මනරම් කඳුකර දසුන්.",
+      type: "hiking",
+      distance: "Guided 45-minute mountain trail from the base",
+    },
+    {
+      id: "pimbura_circuit",
+      nameEn: "Pimbura Mountain Hiking Circuit",
+      nameSi: "පිඹුර කඳුකර හයිකින් චාරිකාව",
+      descEn: "Scenic ridgeline hike crossing rubber estates, pine borders, tea valleys, and mist points.",
+      descSi: "කඳු වැටි, තේ වතු සහ මීදුම් නිම්න හරහා වැටී ඇති සුන්දර පා ගමන.",
+      type: "hiking",
+      distance: "2-3 hour circuit trail",
+    },
+    {
+      id: "vanishing_river",
+      nameEn: "Vanishing River & Secret Cascades",
+      nameSi: "ගිලෙන ගඟ සහ වනගත දියඇලි",
+      descEn: "A unique geological stream that flows under boulders and emerges into clear jungle bathing pools.",
+      descSi: "ගල් කුළු යටින් ගලා යන අපූරු දිය දහර සහ වනගත ස්නාන තටාක.",
+      type: "nature",
+      distance: "30-minute guided walk",
+    },
+  ],
+};
+
+export const USD_EXCHANGE_RATE = 310;
