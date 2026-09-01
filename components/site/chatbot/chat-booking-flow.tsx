@@ -19,9 +19,36 @@ export function ChatBookingFlow({
   onBookingSuccess?: (voucher: BookingVoucherPayload) => void;
   onCancel?: () => void;
 }) {
+  const availableRooms = initialDraft?.availableRooms && initialDraft.availableRooms.length > 0
+    ? initialDraft.availableRooms
+    : [
+        {
+          id: initialDraft?.roomId || "ba3cf45f-41e9-4a45-92ec-d37340d3b60f",
+          name: initialDraft?.roomName || "Double Room with Private Bathroom",
+          basePriceLkr: initialDraft?.pricePerNightLkr || 7500,
+          basePriceUsd: initialDraft?.pricePerNightUsd || 24,
+          maxGuests: 2,
+        },
+        {
+          id: "deluxe-triple-room",
+          name: "Deluxe Triple Room",
+          basePriceLkr: 11000,
+          basePriceUsd: 35,
+          maxGuests: 3,
+        },
+        {
+          id: "mountain-family-suite",
+          name: "Mountain Family Suite",
+          basePriceLkr: 16000,
+          basePriceUsd: 52,
+          maxGuests: 5,
+        },
+      ];
+
   const [step, setStep] = useState<"edit" | "review" | "confirmed">("edit");
-  const [roomId, setRoomId] = useState(initialDraft?.roomId ?? "");
-  const [roomName, setRoomName] = useState(initialDraft?.roomName ?? "");
+  const [roomId, setRoomId] = useState(initialDraft?.roomId || availableRooms[0]?.id || "");
+  const [roomName, setRoomName] = useState(initialDraft?.roomName || availableRooms[0]?.name || "");
+  const [pricePerNightLkr, setPricePerNightLkr] = useState(initialDraft?.pricePerNightLkr || availableRooms[0]?.basePriceLkr || 7500);
   const [checkIn, setCheckIn] = useState(initialDraft?.checkIn ?? "");
   const [checkOut, setCheckOut] = useState(initialDraft?.checkOut ?? "");
   const [guests, setGuests] = useState(initialDraft?.guests ?? 2);
@@ -41,8 +68,8 @@ export function ChatBookingFlow({
   };
 
   const nights = calculateNights();
-  const basePriceLkr = initialDraft?.pricePerNightLkr ?? 12000;
-  const totalLkr = basePriceLkr * nights;
+  const basePrice = pricePerNightLkr;
+  const totalLkr = basePrice * nights;
   const totalUsd = Math.round(totalLkr / 310);
 
   const handleProceedToReview = (e: React.FormEvent) => {
@@ -241,6 +268,30 @@ export function ChatBookingFlow({
             Cancel
           </button>
         ) : null}
+      </div>
+
+      {/* Room Selector Dropdown */}
+      <div>
+        <label className="text-[10px] font-medium text-muted block mb-0.5">Select Room</label>
+        <select
+          value={roomId}
+          onChange={(e) => {
+            const selectedId = e.target.value;
+            setRoomId(selectedId);
+            const chosen = availableRooms.find((r) => r.id === selectedId);
+            if (chosen) {
+              setRoomName(chosen.name);
+              setPricePerNightLkr(chosen.basePriceLkr);
+            }
+          }}
+          className="w-full rounded-md border border-black/15 bg-background px-2.5 py-1.5 text-xs text-text focus:border-primary focus:outline-hidden font-medium"
+        >
+          {availableRooms.map((r) => (
+            <option key={r.id} value={r.id}>
+              {r.name} — {currency === "USD" ? `$${r.basePriceUsd}/night` : `LKR ${r.basePriceLkr.toLocaleString()}/night`}
+            </option>
+          ))}
+        </select>
       </div>
 
       <div className="grid grid-cols-2 gap-2">

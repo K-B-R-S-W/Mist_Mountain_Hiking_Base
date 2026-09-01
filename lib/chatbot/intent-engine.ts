@@ -61,6 +61,13 @@ export function processFallbackIntent(options: {
         roomName: rooms[0]?.name,
         pricePerNightLkr: rooms[0]?.basePrice,
         pricePerNightUsd: rooms[0] ? Math.round(rooms[0].basePrice / USD_EXCHANGE_RATE) : undefined,
+        availableRooms: rooms.map((r) => ({
+          id: r.id,
+          name: r.name,
+          basePriceLkr: r.basePrice,
+          basePriceUsd: Math.round(r.basePrice / USD_EXCHANGE_RATE),
+          maxGuests: r.maxGuests,
+        })),
       },
     });
 

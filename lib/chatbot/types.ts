@@ -62,6 +62,13 @@ export type BookingDraftPayload = {
   email?: string;
   phone?: string;
   message?: string;
+  availableRooms?: Array<{
+    id: string;
+    name: string;
+    basePriceLkr: number;
+    basePriceUsd: number;
+    maxGuests: number;
+  }>;
 };
 
 export type BookingVoucherPayload = {
