@@ -1,246 +1,249 @@
 import { ItineraryCardPayload, LanguageCode } from "./types";
 
+interface ItineraryDayData {
+  dayNumber: number;
+  title: string;
+  morning: { title: string; desc: string; duration: string };
+  afternoon: { title: string; desc: string; duration: string };
+  evening: { title: string; desc: string; duration: string };
+  highlights: string[];
+}
+
+const ENGLISH_DAYS_CATALOG: Array<(dayNum: number, isLastDay: boolean) => ItineraryDayData> = [
+  // Day 1
+  (dayNum) => ({
+    dayNumber: dayNum,
+    title: `Day ${dayNum}: Arrival, Plantation Walk & Natural Spring Pools`,
+    morning: {
+      title: "Arrival & Welcome King Coconut",
+      desc: "Check in to your mountain room (from 2:00 PM) and refresh with fresh king coconut plucked straight from our plantation.",
+      duration: "1.5 hrs",
+    },
+    afternoon: {
+      title: "Two Live Spring Pools & Estate Walk",
+      desc: "Swim in our 100% chemical-free natural mountain spring pools and explore the 10-acre high-elevation Ceylon tea estate.",
+      duration: "2.5 hrs",
+    },
+    evening: {
+      title: "Traditional Hearth Dinner & Campfire",
+      desc: "Clay-pot Sri Lankan hearth cuisine with estate-grown spices and evening stargazing under misty mountain breezes.",
+      duration: "2 hrs",
+    },
+    highlights: ["Natural Spring Pools", "Fresh King Coconut", "Clay-Pot Hearth Dinner"],
+  }),
+  // Day 2
+  (dayNum, isLastDay) => ({
+    dayNumber: dayNum,
+    title: `Day ${dayNum}: Kukuluwa Cave Temple Summit & Ridgeline Hike`,
+    morning: {
+      title: "Kukuluwa Raja Maha Viharaya Guided Trek",
+      desc: "Guided 45-minute mountain trail to an ancient historic rock cave temple with panoramic 360° valley vistas and drip ledges.",
+      duration: "3 hrs",
+    },
+    afternoon: {
+      title: isLastDay ? "Spices Workshop & Departure" : "Ceylon Tea & Cinnamon Peeling Experience",
+      desc: isLastDay
+        ? "Witness cinnamon processing, enjoy a wholesome village lunch, and check out with fresh plantation memories."
+        : "Hands-on tea plucking and authentic cinnamon peeling demonstration with our estate artisans, followed by spring pool bathing.",
+      duration: isLastDay ? "2 hrs" : "2.5 hrs",
+    },
+    evening: {
+      title: isLastDay ? "Departure & Safe Travels" : "Terrace Barbecue & Night Mist",
+      desc: isLastDay
+        ? "Scenic 2.5-hour drive back to Colombo or next destination."
+        : "Outdoor barbecue on the open terrace with grilled specialties and cool mountain air.",
+      duration: isLastDay ? "1 hr" : "2.5 hrs",
+    },
+    highlights: ["Kukuluwa Cave Temple", isLastDay ? "Plantation Lunch" : "Ceylon Cinnamon Demo", isLastDay ? "Safe Travels" : "Terrace BBQ"],
+  }),
+  // Day 3
+  (dayNum, isLastDay) => ({
+    dayNumber: dayNum,
+    title: `Day ${dayNum}: Pimbura Mountain Circuit & Vanishing River`,
+    morning: {
+      title: "Pimbura Ridgeline Hiking Circuit",
+      desc: "2-3 hour scenic mountain trek traversing mist viewpoints, wild rubber borders, and pristine tea terraces.",
+      duration: "3 hrs",
+    },
+    afternoon: {
+      title: "Vanishing River & Secret Rock Cascades",
+      desc: "Explore subterranean mountain streams disappearing under granite boulders into natural forest pools.",
+      duration: "2.5 hrs",
+    },
+    evening: {
+      title: isLastDay ? "Final Dinner & Checkout" : "Acoustic Campfire & Village Feast",
+      desc: isLastDay
+        ? "Relaxing spring bath, traditional dinner, and preparation for departure."
+        : "Cozy campfire session with authentic herbal tea, roast cassava, and village storytelling.",
+      duration: "2 hrs",
+    },
+    highlights: ["Pimbura Ridgeline Trek", "Vanishing River", isLastDay ? "Farewell Lunch" : "Acoustic Campfire"],
+  }),
+  // Day 4
+  (dayNum, isLastDay) => ({
+    dayNumber: dayNum,
+    title: `Day ${dayNum}: Agro-Heritage Tour & Forest Bathing`,
+    morning: {
+      title: "Black Pepper Vines & Organic Harvest Tour",
+      desc: "Learn about traditional Ceylon black pepper cultivation, clove trees, and organic vegetable garden harvesting.",
+      duration: "2 hrs",
+    },
+    afternoon: {
+      title: "Deep Jungle Bathing & Waterfall Springs",
+      desc: "Hidden forest cascades and quiet natural meditation rocks surrounded by bird calls and endemic flora.",
+      duration: "3 hrs",
+    },
+    evening: {
+      title: "Estate Chef's Special Curry Night",
+      desc: "Curated 7-curry traditional feast featuring freshly picked herbs and garden produce.",
+      duration: "2 hrs",
+    },
+    highlights: ["Black Pepper & Spices", "Secret Waterfall Springs", "7-Curry Village Feast"],
+  }),
+  // Day 5+
+  (dayNum) => ({
+    dayNumber: dayNum,
+    title: `Day ${dayNum}: Rainforest Border Exploration & Departure`,
+    morning: {
+      title: "Sunrise Birdwatching & Scenic Valley Trail",
+      desc: "Early morning hike along the valley ridge spotting endemic birds and morning mist rolls.",
+      duration: "2.5 hrs",
+    },
+    afternoon: {
+      title: "Final Spring Pool Refresh & Checkout",
+      desc: "Final swim in the natural mountain spring pools, traditional lunch, and warm farewell from our team.",
+      duration: "2 hrs",
+    },
+    evening: {
+      title: "Safe Journey Home",
+      desc: "Depart rejuvenated with organic plantation spices and unforgettable memories.",
+      duration: "1 hr",
+    },
+    highlights: ["Sunrise Ridge Views", "Final Spring Dip", "Safe Departure"],
+  }),
+];
+
+const SINHALA_DAYS_CATALOG: Array<(dayNum: number, isLastDay: boolean) => ItineraryDayData> = [
+  // Day 1
+  (dayNum) => ({
+    dayNumber: dayNum,
+    title: `දිනය ${dayNum}: පැමිණීම, පිළිගැනීමේ තැඹිලි සහ ස්වාභාවික උල්පත් දිය තටාක`,
+    morning: {
+      title: "පැමිණීම සහ කාමරයට පිවිසීම",
+      desc: "දහවල් 2:00 සිට පැමිණීම, අපගේ අක්කර 10 වතුයායේ නැවුම් තැඹිලි පිළිගැන්ම සහ කාමරයට පිවිසීම.",
+      duration: "පැය 1.5",
+    },
+    afternoon: {
+      title: "ස්වාභාවික උල්පත් දිය තටාක ස්නානය",
+      desc: "රසායනික ද්‍රව්‍ය රහිත පිරිසිදු කඳුකර උල්පත් ජල තටාකවල ස්නානය සහ සවස සිලෝන් තේ වේලාව.",
+      duration: "පැය 2.5",
+    },
+    evening: {
+      title: "ගැමි මැටි ලිපේ රාත්‍රී භෝජනය සහ කැම්ප්ෆයර්",
+      desc: "නැවුම් කුළුබඩු මිශ්‍ර ගමේ ක්‍රමයට පිසූ රසවත් ආහාර සහ රාත්‍රී තරු නැරඹීම.",
+      duration: "පැය 2",
+    },
+    highlights: ["ස්වාභාවික දිය තටාක", "පිළිගැනීමේ තැඹිලි", "කැම්ප්ෆයර් රාත්‍රී ආහාරය"],
+  }),
+  // Day 2
+  (dayNum, isLastDay) => ({
+    dayNumber: dayNum,
+    title: `දිනය ${dayNum}: කුකුළුවා රජ මහා විහාරය සහ ලෙන් පරිශ්‍රය`,
+    morning: {
+      title: "ඓතිහාසික ලෙන් විහාරය වෙත කඳුකර පා ගමන",
+      desc: "මීදුම් නිම්න දසුන් නරඹමින් ඓතිහාසික කුකුළුවා ලෙන් විහාරය සහ කටාරම් කෙටූ ගල් ලෙන් වෙත මඟපෙන්වන්නන් සහිත පා ගමන.",
+      duration: "පැය 3",
+    },
+    afternoon: {
+      title: isLastDay ? "තේ/කුරුඳු අත්දැකීම් සහ පිටත්වීම" : "තේ හා කුරුඳු වතු අත්දැකීම",
+      desc: isLastDay
+        ? "කුරුඳු තැලීම දැකබලා ගැනීම, දිවා ආහාරය සහ පිටත්වීම."
+        : "තේ දළු නෙළීම සහ සාම්ප්‍රදායික කුරුඳු තැලීමේ අත්දැකීම, පසුව දිය තටාක විවේකය.",
+      duration: "පැය 2.5",
+    },
+    evening: {
+      title: isLastDay ? "චාරිකාව නිමාව" : "බාබකියු රාත්‍රිය",
+      desc: isLastDay ? "සුන්දර මතකයන් සමග පිටත්වීම." : "කඳු මුදුනේ සිසිල් මීදුම මධ්‍යයේ රසවත් බාබකියු රාත්‍රියක්.",
+      duration: isLastDay ? "පැය 1" : "පැය 2.5",
+    },
+    highlights: ["කුකුළුවා රජ මහා විහාරය", isLastDay ? "ගමේ දිවා ආහාරය" : "කුරුඳු හා තේ අත්දැකීම", isLastDay ? "සුරක්ෂිත ගමනක්" : "බාබකියු රාත්‍රිය"],
+  }),
+  // Day 3
+  (dayNum, isLastDay) => ({
+    dayNumber: dayNum,
+    title: `දිනය ${dayNum}: පිඹුර කඳුකර මංපෙත සහ ගිලෙන ගඟ ගවේෂණය`,
+    morning: {
+      title: "පිඹුර කඳුකර හයිකින් පරිපථය",
+      desc: "තේ නිම්න, මීදුම් මුදුන් සහ රබර් වතු මායිම් ඔස්සේ පැය 2-3ක සුන්දර කඳුකර පා ගමන.",
+      duration: "පැය 3",
+    },
+    afternoon: {
+      title: "ගිලෙන ගඟ සහ වනගත දියඇලි",
+      desc: "ගල් කුළු යටින් ගලායන ගිලෙන ගඟ සහ ස්වාභාවික වනගත දිය තටාක ගවේෂණය.",
+      duration: "පැය 2.5",
+    },
+    evening: {
+      title: isLastDay ? "දිවා ආහාරය සහ පිටත්වීම" : "කැම්ප්ෆයර් සාදය",
+      desc: isLastDay ? "අවසාන ස්නානය, ශ්‍රී ලාංකික දිවා ආහාරය සහ පිටත්වීම." : "සුවපහසු ගිනිමැලය වටා එකතුවීම සහ ග්‍රාමීය රාත්‍රී භෝජනය.",
+      duration: "පැය 2",
+    },
+    highlights: ["පිඹුර හයිකින් පරිපථය", "ගිලෙන ගඟ", isLastDay ? "පිටත්වීමේ දිවා ආහාරය" : "ගිනිමැල සාදය"],
+  }),
+  // Day 4+
+  (dayNum) => ({
+    dayNumber: dayNum,
+    title: `දිනය ${dayNum}: ස්වාභාවික වනාන්තර දිය ඇලි සහ පිටත්වීම`,
+    morning: {
+      title: "කුරුළු නැරඹීම සහ උදෑසන කඳුකර සිරිය",
+      desc: "මීදුම් අතරින් නැගෙන හිරු උදාව සහ කඳුකර පක්ෂීන් නැරඹීමේ පා ගමන.",
+      duration: "පැය 2.5",
+    },
+    afternoon: {
+      title: "අවසාන උල්පත් දිය නෑම සහ පිටත්වීම",
+      desc: "නැවුම් ස්වාභාවික දිය තටාක ස්නානය, දිවා ආහාරය සහ සුරක්ෂිතව ආපසු ගමන් ඇරඹීම.",
+      duration: "පැය 2",
+    },
+    evening: {
+      title: "චාරිකාව නිමාව",
+      desc: "නිරවුල් මනසකින් යුතුව නිවස බලා පිටත්වීම.",
+      duration: "පැය 1",
+    },
+    highlights: ["හිරු උදාව", "උල්පත් දිය නෑම", "සුරක්ෂිත ගමනක්"],
+  }),
+];
+
 export function generateCustomItinerary(
   nights = 2,
   language: LanguageCode = "en"
 ): ItineraryCardPayload {
-  const safeNights = Math.max(1, Math.min(nights, 4));
+  const safeDays = Math.max(2, Math.min(nights + 1, 7));
+  const safeNights = safeDays - 1;
 
-  if (language === "si") {
-    if (safeNights === 1) {
-      return {
-        durationNights: 1,
-        title: "දින 2 / රාත්‍රී 1 කෙටි හයිකින් චාරිකා සැලැස්ම",
-        summary: "පැමිණීම, ස්වාභාවික උල්පත් දිය තටාක ස්නානය, කඳුකර රාත්‍රී ආහාරය සහ කුකුළුවා රජ මහා විහාර චාරිකාව.",
-        days: [
-          {
-            dayNumber: 1,
-            title: "දිනය 1: පැමිණීම, තැඹිලි පානය සහ ස්වාභාවික දිය තටාක",
-            morning: {
-              title: "පැමිණීම සහ පිළිගැනීම",
-              desc: "දහවල් 12-2 අතර පැමිණීම, වත්තෙන්ම කපා දෙන නැවුම් තැඹිලි පිළිගැන්ම සහ කාමරයට පිවිසීම.",
-              duration: "පැය 1.5",
-            },
-            afternoon: {
-              title: "ස්වාභාවික උල්පත් දිය තටාක ස්නානය",
-              desc: "කඳුකර උල්පතින් පිරෙන පිරිසිදු දිය තටාකයේ විවේකය සහ සවස තේ රස බැලීම.",
-              duration: "පැය 2.5",
-            },
-            evening: {
-              title: "කැම්ප්ෆයර් සහ සාම්ප්‍රදායික ග්‍රාමීය රාත්‍රී භෝජනය",
-              desc: "රාත්‍රී තරු දසුන් සමග කැම්ප්ෆයර් ගින්න වටා එකතු වීම සහ නැවුම් ගම්මාන ආහාර වේලක්.",
-              duration: "පැය 2",
-            },
-            highlights: ["ස්වාභාවික උල්පත් දිය තටාක", "පිළිගැනීමේ තැඹිලි", "කැම්ප්ෆයර් රාත්‍රී භෝජනය"],
-          },
-          {
-            dayNumber: 2,
-            title: "දිනය 2: කුකුළුවා රජ මහා විහාරය සහ තේ වතු පා ගමන",
-            morning: {
-              title: "ඓතිහාසික ලෙන් විහාරය වෙත උදෑසන හයිකින් චාරිකාව",
-              desc: "මීදුම් මිටියාවත නරඹමින් කුකුළුවා රජ මහා විහාරය දක්වා විනාඩි 45ක මඟපෙන්වන්නන් සහිත පා ගමන.",
-              duration: "පැය 2.5",
-            },
-            afternoon: {
-              title: "තේ හා කුරුඳු අත්දැකීම් සහ පිටත්වීම",
-              desc: "තේ දළු නෙළීමේ ක්‍රියාවලිය දැකබලා ගැනීම, දිවා ආහාරය සහ පිටත්වීම.",
-              duration: "පැය 1.5",
-            },
-            evening: {
-              title: "චාරිකාව නිමාව",
-              desc: "සුන්දර මතකයන් සමග පිටත්ව යාම.",
-              duration: "පැය 1",
-            },
-            highlights: ["කුකුළුවා රජ මහා විහාරය", "තේ හා කුරුඳු අත්දැකීම", "මීදුම් මිටියාවත දසුන්"],
-          },
-        ],
-      };
+  const catalog = language === "si" ? SINHALA_DAYS_CATALOG : ENGLISH_DAYS_CATALOG;
+  const days: ItineraryDayData[] = [];
+
+  for (let i = 0; i < safeDays; i++) {
+    const dayNum = i + 1;
+    const isLastDay = dayNum === safeDays;
+    const generator = catalog[Math.min(i, catalog.length - 1)] ?? catalog[0];
+    if (generator) {
+      days.push(generator(dayNum, isLastDay));
     }
-
-    return {
-      durationNights: safeNights,
-      title: `දින ${safeNights + 1} / රාත්‍රී ${safeNights} පූර්ණ කඳුකර චාරිකා සැලැස්ම`,
-      summary: "ස්වාභාවික දිය තටාක, කුකුළුවා රජ මහා විහාරය, පිඹුර කඳුකර හයිකින් පරිපථය සහ තේ/කුරුඳු අස්වනු අත්දැකීම්.",
-      days: [
-        {
-          dayNumber: 1,
-          title: "දිනය 1: පැමිණීම සහ උල්පත් දිය තටාක විවේකය",
-          morning: {
-            title: "පැමිණීම සහ පිළිගැනීමේ තැඹිලි පානය",
-            desc: "බංගලාවට පැමිණීම, කාමරවලට පිවිසීම සහ වටපිටාව නිරීක්ෂණය.",
-            duration: "පැය 1.5",
-          },
-          afternoon: {
-            title: "ස්වාභාවික උල්පත් දිය තටාක ස්නානය",
-            desc: "රසායනික රහිත පිරිසිදු උල්පත් ජලයේ ස්නානය සහ සවස සිලෝන් තේ වේලාව.",
-            duration: "පැය 2.5",
-          },
-          evening: {
-            title: "ග්‍රාමීය රාත්‍රී භෝජනය සහ කැම්ප්ෆයර්",
-            desc: "නැවුම් කුළුබඩු මිශ්‍ර ගමේ ක්‍රමයට පිසූ ආහාර සහ රාත්‍රී තරු නැරඹීම.",
-            duration: "පැය 2",
-          },
-          highlights: ["ස්වාභාවික දිය තටාක", "ගමේ ක්‍රමයට ආහාර", "කැම්ප්ෆයර්"],
-        },
-        {
-          dayNumber: 2,
-          title: "දිනය 2: පිඹුර කඳුකර හයිකින් චාරිකාව සහ කුකුළුවා විහාරය",
-          morning: {
-            title: "කුකුළුවා රජ මහා විහාරය සහ ලෙන් පරිශ්‍රය",
-            desc: "කඳුකර නිම්න දසුන් නරඹමින් ඓතිහාසික කුකුළුවා ලෙන් විහාරය වෙත මඟපෙන්වන්නන් සහිත චාරිකාව.",
-            duration: "පැය 3",
-          },
-          afternoon: {
-            title: "තේ හා කුරුඳු වතු අත්දැකීම",
-            desc: "කුරුඳු තැලීම, ගම්මිරිස් සහ තේ වගාව නැරඹීම සහ සවස දිය තටාක විවේකය.",
-            duration: "පැය 2.5",
-          },
-          evening: {
-            title: "බාබකියු රාත්‍රිය",
-            desc: "කඳු මුදුනේ සිසිල් මීදුම මධ්‍යයේ රසවත් බාබකියු රාත්‍රියක්.",
-            duration: "පැය 2.5",
-          },
-          highlights: ["කුකුළුවා රජ මහා විහාරය", "කුරුඳු හා තේ අත්දැකීම", "බාබකියු රාත්‍රිය"],
-        },
-        {
-          dayNumber: 3,
-          title: "දිනය 3: මීදුම් උදෑසන සහ ගිලෙන ගඟ ගවේෂණය",
-          morning: {
-            title: "ගිලෙන ගඟ සහ වනගත දියඇලි පා ගමන",
-            desc: "ගල් කුළු යටින් ගලායන ගිලෙන ගඟේ අපූරු ස්වභාවය දැකබලා ගැනීම.",
-            duration: "පැය 2.5",
-          },
-          afternoon: {
-            title: "දිවා ආහාරය සහ පිටත්වීම",
-            desc: "අවසාන ස්නානය, ශ්‍රී ලාංකික දිවා ආහාරය සහ පිටත්වීම.",
-            duration: "පැය 2",
-          },
-          evening: {
-            title: "චාරිකාව නිමාව",
-            desc: "නිරවුල් මනසකින් යුතුව ආපසු ගමන් ඇරඹීම.",
-            duration: "පැය 1",
-          },
-          highlights: ["ගිලෙන ගඟ", "වනගත දියඇලි", "පිටත්වීමේ දිවා ආහාරය"],
-        },
-      ],
-    };
   }
 
-  if (safeNights === 1) {
+  if (language === "si") {
     return {
-      durationNights: 1,
-      title: "2-Day / 1-Night Mountain Recharge Itinerary",
-      summary: "Arrival coconut, natural spring pool plunge, village dinner, and morning guided hike to Kukuluwa Raja Maha Viharaya.",
-      days: [
-        {
-          dayNumber: 1,
-          title: "Day 1: Arrival & Natural Spring Pools",
-          morning: {
-            title: "Arrival & Welcome Coconut",
-            desc: "Check-in between 12:00 - 2:00 PM, enjoy a fresh king coconut cut straight from the plantation canopy.",
-            duration: "1.5 hrs",
-          },
-          afternoon: {
-            title: "Gravity-Fed Spring Pool Bathing",
-            desc: "Swim in pure chemical-free mountain spring water followed by afternoon Ceylon estate tea.",
-            duration: "2.5 hrs",
-          },
-          evening: {
-            title: "Campfire & Authentic Village Dinner",
-            desc: "Traditional Sri Lankan curries prepared with local produce, campfire under the mountain stars.",
-            duration: "2 hrs",
-          },
-          highlights: ["Natural Spring Pools", "Welcome Coconut", "Campfire Village Dinner"],
-        },
-        {
-          dayNumber: 2,
-          title: "Day 2: Kukuluwa Temple Trail & Plantation Walk",
-          morning: {
-            title: "Kukuluwa Raja Maha Viharaya Cave Hike",
-            desc: "Guided 45-minute ridge trail to the ancient cave temple with valley views across Sinharaja buffer.",
-            duration: "2.5 hrs",
-          },
-          afternoon: {
-            title: "Cinnamon & Tea Walk / Departure",
-            desc: "Witness cinnamon peeling demonstrations, fresh pepper harvest, lunch and checkout by 11:00 AM - 1:00 PM.",
-            duration: "1.5 hrs",
-          },
-          evening: {
-            title: "Journey Home",
-            desc: "Depart with mountain memories and fresh plantation spices.",
-            duration: "1 hr",
-          },
-          highlights: ["Kukuluwa Cave Temple", "Plantation Agro-Walk", "Scenic Mountain Views"],
-        },
-      ],
+      durationNights: safeNights,
+      title: `දින ${safeDays} / රාත්‍රී ${safeNights} පූර්ණ කඳුකර චාරිකා සැලැස්ම`,
+      summary: "ස්වාභාවික දිය තටාක, කුකුළුවා රජ මහා විහාරය, පිඹුර කඳුකර හයිකින් පරිපථය සහ තේ/කුරුඳු අස්වනු අත්දැකීම්.",
+      days,
     };
   }
 
   return {
     durationNights: safeNights,
-    title: `${safeNights + 1}-Day / ${safeNights}-Night Ultimate Mountain Circuit`,
-    summary: "Balanced pace of mountain trail hiking, Kukuluwa cave temple, tea & cinnamon harvesting, and spring pool relaxation.",
-    days: [
-      {
-        dayNumber: 1,
-        title: "Day 1: Basecamp Arrival & Spring Pools",
-        morning: {
-          title: "Arrival & Mountain Orientation",
-          desc: "Settle into your room, take in the valley mist, and enjoy plantation king coconut.",
-          duration: "1.5 hrs",
-        },
-        afternoon: {
-          title: "Two Live Spring Pools",
-          desc: "Relax in the chemical-free mountain pools; water overflow irrigates the surrounding crops.",
-          duration: "2.5 hrs",
-        },
-        evening: {
-          title: "Campfire & Hearth Dinner",
-          desc: "Clay-pot village dinner with estate-grown vegetables and spices.",
-          duration: "2 hrs",
-        },
-        highlights: ["Spring Pool Dip", "Fresh Coconut", "Campfire Hearth"],
-      },
-      {
-        dayNumber: 2,
-        title: "Day 2: Kukuluwa Temple & Pimbura Ridge Hike",
-        morning: {
-          title: "Kukuluwa Raja Maha Viharaya & Cave Exploration",
-          desc: "Ascend the historic trail to the temple caves, drip ledges, and 360-degree mountain vantage points.",
-          duration: "3 hrs",
-        },
-        afternoon: {
-          title: "Agro-Tourism: Tea & Cinnamon Experience",
-          desc: "Hands-on tea plucking and cinnamon harvesting with our local estate team.",
-          duration: "2 hrs",
-        },
-        evening: {
-          title: "Mountain Barbecue & Stargazing",
-          desc: "Freshly prepared barbecue on the open terrace with crisp mountain air.",
-          duration: "2.5 hrs",
-        },
-        highlights: ["Kukuluwa Cave Temple", "Tea & Cinnamon Harvest", "Terrace BBQ"],
-      },
-      {
-        dayNumber: 3,
-        title: "Day 3: Vanishing River Cascades & Departure",
-        morning: {
-          title: "Vanishing River & Secret Rock Pools",
-          desc: "Guided walk to the unique underground river flow and jungle bathing cascades.",
-          duration: "2 hrs",
-        },
-        afternoon: {
-          title: "Traditional Lunch & Checkout",
-          desc: "Final mountain dip, wholesome Sri Lankan lunch, and checkout.",
-          duration: "2 hrs",
-        },
-        evening: {
-          title: "Safe Travels",
-          desc: "2.5-hour comfortable drive back to Colombo.",
-          duration: "1 hr",
-        },
-        highlights: ["Vanishing River", "Secret Cascades", "Farewell Lunch"],
-      },
-    ],
+    title: `${safeDays}-Day / ${safeNights}-Night Ultimate Mountain Adventure`,
+    summary: "A balanced mountain escape featuring natural spring pools, Kukuluwa cave temple trek, 10-acre tea & cinnamon estate, and authentic hearth dining.",
+    days,
   };
 }
