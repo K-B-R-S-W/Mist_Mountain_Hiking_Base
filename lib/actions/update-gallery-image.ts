@@ -5,11 +5,18 @@ import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { withAdminAction, type ActionResult } from "@/lib/actions/with-admin-action";
 
+const toOptionalString = (max: number) =>
+  z.preprocess((val) => {
+    if (val === null || val === undefined) return undefined;
+    const str = String(val).trim();
+    return str === "" ? null : str;
+  }, z.string().max(max).nullable().optional());
+
 const updateGalleryImageSchema = z.object({
   id: z.string().uuid(),
-  title: z.string().trim().max(140).optional().or(z.literal("")),
-  description: z.string().trim().max(2000).optional().or(z.literal("")),
-  category: z.string().trim().max(50).optional().or(z.literal("")),
+  title: toOptionalString(140),
+  description: toOptionalString(2000),
+  category: toOptionalString(50),
   isVisible: z.coerce.boolean(),
   featured: z.coerce.boolean(),
   sortOrder: z.coerce.number().int().min(0).max(9999),
@@ -28,9 +35,9 @@ export async function updateGalleryImage(input: unknown): Promise<ActionResult<{
     const { error } = await supabase
       .from("gallery_images")
       .update({
-        title: gallery.title || null,
-        description: gallery.description || null,
-        category: gallery.category || null,
+        title: gallery.title ?? null,
+        description: gallery.description ?? null,
+        category: gallery.category ?? null,
         is_visible: gallery.isVisible,
         featured: gallery.featured,
         sort_order: gallery.sortOrder,
@@ -52,4 +59,3 @@ export async function updateGalleryImage(input: unknown): Promise<ActionResult<{
     return { id };
   });
 }
-

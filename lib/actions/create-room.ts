@@ -6,9 +6,16 @@ import { createClient } from "@/lib/supabase/server";
 import { withAdminAction, type ActionResult } from "@/lib/actions/with-admin-action";
 import { slugify } from "@/lib/utils/slugify";
 
+const toOptionalString = (max: number) =>
+  z.preprocess((val) => {
+    if (val === null || val === undefined) return undefined;
+    const str = String(val).trim();
+    return str === "" ? null : str;
+  }, z.string().max(max).nullable().optional());
+
 const createRoomSchema = z.object({
-  name: z.string().trim().min(1).max(200),
-  shortDescription: z.string().trim().max(300).optional().or(z.literal("")),
+  name: z.string().trim().min(1, "Room name is required").max(200),
+  shortDescription: toOptionalString(300),
   maxGuests: z.coerce.number().int().min(1).max(20),
   basePrice: z.coerce.number().min(0),
 });
@@ -24,8 +31,6 @@ export async function createRoom(input: unknown): Promise<ActionResult<{ id: str
     const baseSlug = slugify(parsed.data.name);
     if (!baseSlug) throw new Error("Room name must contain at least one letter or number.");
 
-    // Slugs are immutable once created (spec.md §6) — resolve collisions
-    // once, here, rather than ever regenerating a slug later.
     let slug = baseSlug;
     for (let suffix = 2; ; suffix++) {
       const { data: existing } = await supabase
@@ -47,10 +52,10 @@ export async function createRoom(input: unknown): Promise<ActionResult<{ id: str
       .insert({
         slug,
         name: parsed.data.name,
-        short_description: parsed.data.shortDescription || null,
+        short_description: parsed.data.shortDescription ?? null,
         max_guests: parsed.data.maxGuests,
         base_price: parsed.data.basePrice,
-        is_visible: false, // starts hidden — publish once photos/details are filled in
+        is_visible: false,
         sort_order: count ?? 0,
       })
       .select("id")

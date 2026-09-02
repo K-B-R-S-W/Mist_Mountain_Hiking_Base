@@ -6,11 +6,18 @@ import { createClient } from "@/lib/supabase/server";
 import { withAdminAction, type ActionResult } from "@/lib/actions/with-admin-action";
 import { uploadMediaFile } from "@/lib/media/upload";
 
+const toOptionalString = (max: number) =>
+  z.preprocess((val) => {
+    if (val === null || val === undefined) return undefined;
+    const str = String(val).trim();
+    return str === "" ? null : str;
+  }, z.string().max(max).nullable().optional());
+
 const createGallerySchema = z.object({
-  title: z.string().trim().max(140).optional().or(z.literal("")),
-  description: z.string().trim().max(2000).optional().or(z.literal("")),
-  category: z.string().trim().max(50).optional().or(z.literal("")),
-  alt: z.string().trim().max(200).optional().or(z.literal("")),
+  title: toOptionalString(140),
+  description: toOptionalString(2000),
+  category: toOptionalString(50),
+  alt: toOptionalString(200),
   isVisible: z.coerce.boolean(),
 });
 
