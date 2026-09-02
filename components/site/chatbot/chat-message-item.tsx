@@ -1,6 +1,5 @@
 "use client";
 
-import { User } from "lucide-react";
 import { ChatMessage, CurrencyCode, RoomCardPayload } from "@/lib/chatbot/types";
 import { MistMountainLogo } from "./mist-mountain-logo";
 import { ChatRoomCard } from "./chat-room-card";
@@ -20,36 +19,110 @@ function escapeHtml(str: string): string {
     .replace(/'/g, "&#039;");
 }
 
-function formatMarkdownContent(text: string) {
-  const lines = text.split("\n");
-  return lines.map((line, idx) => {
-    const escaped = escapeHtml(line);
-    const formatted = escaped
-      .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
-      .replace(/\*(.*?)\*/g, "<em>$1</em>");
+function cleanPotentialJson(rawText: string): string {
+  const trimmed = rawText.trim();
+  // Strip code fences if model wrapped response in ```json ... ``` or ```markdown ... ```
+  if (trimmed.startsWith("```")) {
+    const lines = trimmed.split("\n");
+    if (lines[0]?.startsWith("```")) lines.shift();
+    if (lines[lines.length - 1]?.startsWith("```")) lines.pop();
+    const unwrapped = lines.join("\n").trim();
+    if (unwrapped.startsWith("{") && unwrapped.endsWith("}")) {
+      try {
+        const parsed = JSON.parse(unwrapped);
+        return parsed.message || parsed.text || parsed.response || unwrapped;
+      } catch {
+        return unwrapped;
+      }
+    }
+    return unwrapped;
+  }
 
-    if (/^[\*\-]\s+/.test(line)) {
-      const clean = escapeHtml(line.replace(/^[\*\-]\s+/, ""))
+  // Strip standalone JSON object
+  if (trimmed.startsWith("{") && trimmed.endsWith("}")) {
+    try {
+      const parsed = JSON.parse(trimmed);
+      return parsed.message || parsed.text || parsed.response || rawText;
+    } catch {
+      return rawText;
+    }
+  }
+
+  return rawText;
+}
+
+function formatMarkdownContent(rawText: string) {
+  const text = cleanPotentialJson(rawText);
+  const lines = text.split("\n");
+
+  return lines.map((line, idx) => {
+    const trimmedLine = line.trim();
+
+    // Horizontal Rule (--- or ***)
+    if (/^(\-{3,}|\*{3,}|_{3,})$/.test(trimmedLine)) {
+      return <hr key={idx} className="my-1.5 border-black/10" />;
+    }
+
+    // Heading 3 / Heading 2 / Heading 1 (###, ##, #)
+    if (/^#{1,3}\s+/.test(trimmedLine)) {
+      const cleanTitle = trimmedLine.replace(/^#{1,3}\s+/, "");
+      const formattedTitle = escapeHtml(cleanTitle)
+        .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
+        .replace(/\*(.*?)\*/g, "<em>$1</em>");
+
+      return (
+        <h5
+          key={idx}
+          className="font-[family-name:var(--font-fraunces)] font-bold text-primary pt-1 text-xs"
+          dangerouslySetInnerHTML={{ __html: formattedTitle }}
+        />
+      );
+    }
+
+    // Bullet List (- item or * item)
+    if (/^[\*\-]\s+/.test(trimmedLine)) {
+      const clean = escapeHtml(trimmedLine.replace(/^[\*\-]\s+/, ""))
         .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
         .replace(/\*(.*?)\*/g, "<em>$1</em>");
 
       return (
         <li
           key={idx}
-          className="ml-3.5 list-disc leading-relaxed"
+          className="ml-3.5 list-disc leading-relaxed text-[11.5px]"
           dangerouslySetInnerHTML={{ __html: clean }}
         />
       );
     }
 
-    if (!line.trim()) {
-      return <div key={idx} className="h-1.5" />;
+    // Numbered List (1. item)
+    if (/^\d+\.\s+/.test(trimmedLine)) {
+      const clean = escapeHtml(trimmedLine.replace(/^\d+\.\s+/, ""))
+        .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
+        .replace(/\*(.*?)\*/g, "<em>$1</em>");
+
+      return (
+        <li
+          key={idx}
+          className="ml-3.5 list-decimal leading-relaxed text-[11.5px]"
+          dangerouslySetInnerHTML={{ __html: clean }}
+        />
+      );
     }
+
+    // Empty spacing line
+    if (!trimmedLine) {
+      return <div key={idx} className="h-1" />;
+    }
+
+    // Regular Paragraph
+    const formatted = escapeHtml(line)
+      .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
+      .replace(/\*(.*?)\*/g, "<em>$1</em>");
 
     return (
       <p
         key={idx}
-        className="leading-relaxed"
+        className="leading-relaxed text-[11.5px]"
         dangerouslySetInnerHTML={{ __html: formatted }}
       />
     );
@@ -111,10 +184,10 @@ export function ChatMessageItem({
               if (card.type === "room_list") {
                 return (
                   <div key={i} className="space-y-2">
-                    {card.data.map((r) => (
+                    {card.data.map((room) => (
                       <ChatRoomCard
-                        key={r.id}
-                        room={r}
+                        key={room.id}
+                        room={room}
                         currency={currency}
                         onSelect={onSelectRoom}
                       />
@@ -124,13 +197,7 @@ export function ChatMessageItem({
               }
 
               if (card.type === "attraction") {
-                return (
-                  <ChatAttractionCard
-                    key={i}
-                    attraction={card.data}
-                    onNavigate={onNavigate}
-                  />
-                );
+                return <ChatAttractionCard key={i} attraction={card.data} onNavigate={onNavigate} />;
               }
 
               if (card.type === "itinerary") {
@@ -155,7 +222,12 @@ export function ChatMessageItem({
               }
 
               if (card.type === "waitlist") {
-                return <ChatWaitlistCard key={i} data={card.data} />;
+                return (
+                  <ChatWaitlistCard
+                    key={i}
+                    data={card.data}
+                  />
+                );
               }
 
               if (card.type === "whatsapp_handoff") {
@@ -177,13 +249,21 @@ export function ChatMessageItem({
                 return (
                   <div
                     key={i}
-                    onClick={() => onNavigate && onNavigate(card.data.href)}
-                    className="cursor-pointer rounded-lg border border-primary/20 bg-primary/5 p-2.5 text-xs transition hover:bg-primary/10"
+                    className="overflow-hidden rounded-xl border border-black/10 bg-surface p-3 shadow-xs"
                   >
-                    <p className="font-semibold text-primary">{card.data.label}</p>
+                    <h5 className="font-semibold text-primary text-xs">{card.data.label}</h5>
                     {card.data.description ? (
-                      <p className="text-[11px] text-muted">{card.data.description}</p>
+                      <p className="mt-1 text-[11px] text-muted leading-relaxed">
+                        {card.data.description}
+                      </p>
                     ) : null}
+                    <button
+                      onClick={() => onNavigate && onNavigate(card.data.href)}
+                      type="button"
+                      className="mt-2 inline-flex items-center gap-1 rounded-md bg-primary/10 px-2.5 py-1 text-xs font-semibold text-primary hover:bg-primary/20 transition"
+                    >
+                      Open {card.data.label} →
+                    </button>
                   </div>
                 );
               }
@@ -193,12 +273,6 @@ export function ChatMessageItem({
           </div>
         ) : null}
       </div>
-
-      {isUser ? (
-        <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-accent text-background shadow-xs">
-          <User className="h-4 w-4" />
-        </div>
-      ) : null}
     </div>
   );
 }

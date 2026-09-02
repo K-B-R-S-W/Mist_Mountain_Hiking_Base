@@ -47,8 +47,28 @@ export function processFallbackIntent(options: {
     /who are you|what are you|about you|කවුද|ඔබ කවුද|oya\s*kawda|oya\s*kauda/i.test(past)
   ).length;
 
-  // 1. Room Reservation / Availability Flow
-  if (/book|reserve|reservation|availab|check\s*in|check\s*out|වෙන්කර|වෙන් කර/i.test(cleanQ)) {
+  // 1. Room Exploration / List Inquiries (e.g. "what rooms are available", "see rooms", "room types", "කාමර මොනවද තියෙන්නේ")
+  if (
+    /what\s*(are\s*the\s*)?rooms|available\s*rooms|rooms\s*available|see\s*rooms|show\s*rooms|room\s*types|all\s*rooms|කාමර\s*මොනවද|සියලුම\s*කාමර|කාමර\s*බලන්න/i.test(
+      cleanQ
+    )
+  ) {
+    cards.push({ type: "room_list", data: roomCards.slice(0, 4) });
+    message =
+      activeLang === "si"
+        ? "මිස්ට් මවුන්ටන් හි ලබාගත හැකි සුවපහසු කාමර සහ ගාස්තු පහතින් දැක්වේ:"
+        : "Here are our current rooms and per-night tariffs:";
+
+    quickReplies =
+      activeLang === "si"
+        ? ["📅 කාමරයක් වෙන්කරගන්න", "🌊 දිය තටාක", "🗺️ හයිකින් චාරිකා"]
+        : ["📅 Book a Room", "🌊 Spring Pools", "🗺️ Hiking Itinerary"];
+
+    return { message, cards, quickReplies, language: activeLang };
+  }
+
+  // 2. Room Reservation / Availability Flow
+  if (/book|reserve|reservation|check\s*in|check\s*out|වෙන්කර|වෙන් කර/i.test(cleanQ)) {
     const matchedRoom = rooms.find((r) =>
       cleanQ.includes(r.name.toLowerCase()) || (r.slug && cleanQ.includes(r.slug.toLowerCase()))
     ) || rooms[0];

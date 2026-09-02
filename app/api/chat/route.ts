@@ -113,8 +113,16 @@ export async function POST(req: NextRequest) {
       .toLowerCase()
       .trim();
 
-    // 1. Check for booking / reservation intent first
-    if (/book|reserve|reservation|availab|check\s*in|check\s*out|වෙන්කර|වෙන් කර/i.test(cleanQ)) {
+    // 1. Check for room list inquiries first (e.g. "what rooms are available", "view rooms", "room types", "කාමර මොනවද තියෙන්නේ")
+    if (
+      /what\s*(are\s*the\s*)?rooms|available\s*rooms|rooms\s*available|see\s*rooms|show\s*rooms|room\s*types|all\s*rooms|කාමර\s*මොනවද|සියලුම\s*කාමර|කාමර\s*බලන්න/i.test(
+        cleanQ
+      )
+    ) {
+      cards.push({ type: "room_list", data: roomCards.slice(0, 4) });
+    }
+    // 2. Explicit booking / reservation flow
+    else if (/book|reserve|reservation|check\s*in|check\s*out|වෙන්කර|වෙන් කර/i.test(cleanQ)) {
       // Find if user mentioned a specific room
       const matchedRoom = rooms.find((r) =>
         cleanQ.includes(r.name.toLowerCase()) || (r.slug && cleanQ.includes(r.slug.toLowerCase()))
@@ -159,7 +167,7 @@ export async function POST(req: NextRequest) {
         },
       });
     } else if (/room|rooms|tariff|rates|price|cost|කාමර|ගාස්තු/i.test(cleanQ)) {
-      cards.push({ type: "room_list", data: roomCards.slice(0, 3) });
+      cards.push({ type: "room_list", data: roomCards.slice(0, 4) });
     } else if (/spring|pool|water|swim|bath|දිය\s*තටාක|උල්පත්|නාන්න/i.test(cleanQ)) {
       cards.push({
         type: "attraction",
