@@ -80,8 +80,18 @@ Location: ${settings.address ?? MIST_MOUNTAIN_FACTS.location}
 Travel Time: ${MIST_MOUNTAIN_FACTS.distanceFromColombo}
 Check-in: ${MIST_MOUNTAIN_FACTS.checkInTime} | Check-out: ${MIST_MOUNTAIN_FACTS.checkOutTime}
 Contact Details: ${hotelContact}
-Booking URL: ${settings.bookingUrl ?? "Available on website"}
-Airbnb URL: ${settings.airbnbUrl ?? "Available on website"}
+Direct Website Booking: Available directly through this AI Concierge and on our website (/book)
+Booking.com URL: ${settings.bookingUrl ?? MIST_MOUNTAIN_FACTS.bookingDotComUrl}
+Airbnb URL: ${settings.airbnbUrl ?? "Available on Airbnb (search Mist Mountain Hiking Base, Pimbura)"}
+
+BOOKING CHANNELS GUIDANCE:
+Guests can reserve their stay through:
+1. Direct Booking (Fastest, best rate guaranteed, custom assistance via this chat or WhatsApp).
+2. Booking.com (${settings.bookingUrl ?? MIST_MOUNTAIN_FACTS.bookingDotComUrl})
+3. Airbnb (${settings.airbnbUrl ?? "Available on Airbnb"})
+4. Direct WhatsApp / Phone (${hotelContact})
+
+When guests ask if they can book on Airbnb or Booking.com, confirm warmly that we are officially listed on both platforms, provide the links if requested, and let them know they can also check live availability and reserve directly right here!
 
 VERIFIED ROOMS & TARIFFS:
 ${roomListString || "No rooms currently loaded."}

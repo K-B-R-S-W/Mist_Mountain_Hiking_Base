@@ -206,7 +206,37 @@ export function processFallbackIntent(options: {
     return { message, cards, quickReplies, language: activeLang };
   }
 
-  // 6. Location & Contact
+  // 6. Airbnb & Booking.com OTA channels
+  if (/airbnb|booking\.com|booking\s*com|ota|agoda/i.test(cleanQ)) {
+    const bookingUrl = settings.bookingUrl || MIST_MOUNTAIN_FACTS.bookingDotComUrl;
+    const airbnbUrl = settings.airbnbUrl || "https://www.airbnb.com";
+
+    cards.push({
+      type: "nav",
+      data: {
+        label: activeLang === "si" ? "වෙන්කරවා ගැනීමේ ක්‍රම" : "Direct & OTA Booking Channels",
+        href: "/book",
+        description:
+          activeLang === "si"
+            ? "ඔබට Booking.com, Airbnb හෝ අපගේ වෙබ් අඩවිය මගින් සෘජුවම කාමර වෙන්කරවා ගත හැක."
+            : "You can book directly with us for the best rate, or through our official listings on Booking.com and Airbnb.",
+      },
+    });
+
+    message =
+      activeLang === "si"
+        ? `ඔව්, මිස්ට් මවුන්ටන් හි කාමර Booking.com සහ Airbnb ඔස්සේ ද වෙන්කරවා ගත හැක. එසේම හොඳම මිල සහතික කරගැනීම සඳහා අපගේ වෙබ් අඩවිය මගින් හෝ WhatsApp මගින් සෘජුවම වෙන්කරවා ගැනීමට ද පුළුවන.`
+        : `Yes! Mist Mountain Hiking Base is officially listed on both **Booking.com** and **Airbnb**. You can also book directly right here through our website or WhatsApp for direct host assistance and best rate guarantee.`;
+
+    quickReplies =
+      activeLang === "si"
+        ? ["📅 සෘජුව වෙන්කරගන්න", "🏡 කාමර බලන්න", "💬 WhatsApp"]
+        : ["📅 Book Directly", "🏡 View Rooms", "💬 WhatsApp Chat"];
+
+    return { message, cards, quickReplies, language: activeLang };
+  }
+
+  // 7. Location & Contact
   if (/contact|location|where|address|phone|whatsapp|drive|reach|directions|පිහිටීම|කොහොමද\s*එන්නේ|ලිපිනය|දුරකථන|පාර/i.test(cleanQ)) {
     cards.push({
       type: "nav",

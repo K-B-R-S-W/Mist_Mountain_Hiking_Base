@@ -4,6 +4,8 @@ export const MIST_MOUNTAIN_FACTS = {
   location: "Udahawaththa Bungalow, Karavita Road, Pimbura 70470, Sri Lanka",
   sinhalaLocation: "උදහාවත්ත බංගලාව, කරවිට පාර, පිඹුර, ශ්‍රී ලංකාව",
   distanceFromColombo: "Approximately 2.5 hours (~85 km) from Colombo via the Horana - Ratnapura corridor / Kiriella - Pimbura route.",
+  bookingDotComUrl: "https://www.booking.com/hotel/lk/mist-mountain-hiking-base.en-gb.html",
+  airbnbUrl: "https://www.airbnb.com",
   checkInTime: "2:00 PM (14:00)",
   checkOutTime: "11:00 AM (11:00)",
   climate: "Cool mountain mist, lush rainforest canopy, refreshing tropical rainfall. Light sweater and rain jacket/hiking boots recommended.",
