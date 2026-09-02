@@ -1,27 +1,15 @@
 "use client";
 
-import { useActionState, useRef } from "react";
+import { useActionState, useRef, useEffect, useState } from "react";
 import Image from "next/image";
-import { useEffect, useState } from "react";
 import { setSiteAsset, removeSiteAsset } from "@/lib/actions/site-assets";
-import { ConfirmSubmitButton } from "@/components/admin/confirm-submit-button";
+import { ConfirmButton } from "@/components/admin/ui/confirm-dialog";
 import type { ActionResult } from "@/lib/actions/with-admin-action";
+import { UploadCloud, Trash2, CheckCircle2 } from "lucide-react";
 
 type SiteAssetType = "logo" | "favicon" | "hero" | "mist_experience" | "experiences";
 type UploadResult = ActionResult<{ url: string }>;
 
-/**
- * One upload/replace/remove control for a single site_assets slot.
- * Shared by Branding (logo, favicon — square preview) and Homepage
- * Imagery (hero, Mist Experience, Experiences — wide preview).
- *
- * The whole preview tile IS the control: click it, pick a file, it
- * submits itself immediately (no separate "Upload" button to lose
- * track of in a narrow column — that's what was making Hero's button
- * disappear off-layout). Pending/error state comes from useActionState
- * so a failed upload shows a real message instead of silently doing
- * nothing.
- */
 export function SiteAssetUpload({
   type,
   label,
@@ -46,42 +34,42 @@ export function SiteAssetUpload({
     null
   );
 
-  // Optimistic local preview so the tile updates the instant a file is
-  // picked, instead of staying blank until the server round-trip resolves.
   const [localPreview, setLocalPreview] = useState<string | null>(null);
+
   useEffect(() => {
     return () => {
       if (localPreview) URL.revokeObjectURL(localPreview);
     };
   }, [localPreview]);
+
   useEffect(() => {
-    // Once the action settles — success OR failure — drop the temporary
-    // blob preview. On success, revalidatePath brings a fresh `currentUrl`
-    // prop that replaces it. On failure, dropping it is what matters: the
-    // tile must NOT keep showing the picked file as if it had saved, or
-    // the admin has no way to tell a failed upload from a real one (this
-    // was the actual cause of "it shows in Settings but not on the site" —
-    // the DB write never happened, only the local preview looked live).
     if (state && localPreview) {
       URL.revokeObjectURL(localPreview);
       setLocalPreview(null);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [state]);
+  }, [state, localPreview]);
 
   const displayUrl = localPreview ?? currentUrl;
   const boxClass =
     aspect === "wide"
-      ? "relative flex h-36 w-full sm:h-40 rounded-[var(--radius-card-inner)]"
-      : "relative flex h-24 w-24 rounded-[var(--radius-card-inner)]";
+      ? "relative flex h-36 w-full sm:h-44 rounded-xl"
+      : "relative flex h-28 w-28 rounded-xl";
 
   return (
-    <div>
-      <p className="text-sm font-medium">{label}</p>
+    <div className="space-y-1.5">
+      <div className="flex items-center justify-between">
+        <p className="text-xs font-semibold uppercase tracking-wider text-muted">{label}</p>
+        {displayUrl && (
+          <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-emerald-700">
+            <CheckCircle2 className="h-3 w-3" />
+            Configured
+          </span>
+        )}
+      </div>
 
-      <form ref={formRef} action={formAction} className="mt-2">
+      <form ref={formRef} action={formAction}>
         <label
-          className={`${boxClass} group cursor-pointer overflow-hidden border border-dashed border-black/15 bg-black/5 transition hover:border-accent focus-within:outline focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-accent`}
+          className={`${boxClass} group cursor-pointer overflow-hidden border-2 border-dashed border-black/15 bg-black/3 transition hover:border-accent hover:bg-black/5 focus-within:outline focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-accent shadow-xs`}
         >
           <input
             type="file"
@@ -102,40 +90,46 @@ export function SiteAssetUpload({
               alt={currentAlt ?? label}
               fill
               sizes="240px"
-              className={`object-cover transition ${isPending ? "opacity-50" : ""}`}
+              className={`object-cover transition ${isPending ? "opacity-40" : ""}`}
               unoptimized={Boolean(localPreview)}
             />
           ) : null}
           <span
-            className={`pointer-events-none absolute inset-0 flex items-center justify-center text-center text-xs font-medium ${
+            className={`pointer-events-none absolute inset-0 flex flex-col items-center justify-center text-center text-xs font-medium gap-1.5 ${
               displayUrl
-                ? "bg-black/0 text-transparent opacity-0 transition group-hover:bg-black/45 group-hover:text-white group-hover:opacity-100"
+                ? "bg-black/0 text-transparent opacity-0 transition group-hover:bg-black/55 group-hover:text-white group-hover:opacity-100"
                 : "text-muted"
             }`}
           >
-            {isPending ? "Uploading…" : displayUrl ? "Click to replace" : "Click to upload"}
+            <UploadCloud className="h-5 w-5 opacity-70" />
+            <span>{isPending ? "Uploading..." : displayUrl ? "Click to Replace" : "Click to Upload"}</span>
           </span>
         </label>
       </form>
 
-      {currentUrl ? (
-        <form
-          action={async () => {
-            await removeSiteAsset(type);
-          }}
-          className="mt-2"
-        >
-          <ConfirmSubmitButton confirmMessage={removeConfirmMessage} className="text-xs text-red-600 underline">
-            Remove
-          </ConfirmSubmitButton>
-        </form>
-      ) : null}
+      {currentUrl && (
+        <div className="flex justify-end pt-1">
+          <ConfirmButton
+            confirmTitle={`Remove ${label}?`}
+            confirmMessage={removeConfirmMessage}
+            confirmLabel="Remove Asset"
+            variant="danger"
+            onConfirm={async () => {
+              await removeSiteAsset(type);
+            }}
+            className="btn-danger h-7 text-[11px] px-2 gap-1"
+          >
+            <Trash2 className="h-3 w-3" />
+            <span>Remove</span>
+          </ConfirmButton>
+        </div>
+      )}
 
-      {state && !state.ok ? (
-        <p role="alert" className="mt-2 text-xs text-red-600">
+      {state && !state.ok && (
+        <p role="alert" className="text-xs text-rose-600 font-medium">
           {state.error}
         </p>
-      ) : null}
+      )}
     </div>
   );
 }

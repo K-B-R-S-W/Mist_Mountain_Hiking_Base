@@ -2,6 +2,7 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback } from "react";
+import { Calendar } from "lucide-react";
 
 export function DateRangePicker() {
   const router = useRouter();
@@ -42,27 +43,50 @@ export function DateRangePicker() {
   };
 
   return (
-    <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-end">
-      <div className="flex flex-wrap gap-2">
-        <button type="button" onClick={setThisMonth} className="btn-secondary">This Month</button>
-        <button type="button" onClick={setLastMonth} className="btn-secondary">Last Month</button>
-        <button type="button" onClick={setThisYear} className="btn-secondary">This Year</button>
+    <div className="card p-4 flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-xs">
+      <div className="flex flex-wrap items-center gap-2">
+        <span className="text-xs font-semibold uppercase tracking-wider text-muted mr-1 flex items-center gap-1.5">
+          <Calendar className="h-3.5 w-3.5 text-accent" />
+          Presets:
+        </span>
+        <button
+          type="button"
+          onClick={setThisMonth}
+          className="btn-secondary text-xs py-1.5 px-3"
+        >
+          This Month
+        </button>
+        <button
+          type="button"
+          onClick={setLastMonth}
+          className="btn-secondary text-xs py-1.5 px-3"
+        >
+          Last Month
+        </button>
+        <button
+          type="button"
+          onClick={setThisYear}
+          className="btn-secondary text-xs py-1.5 px-3"
+        >
+          This Year
+        </button>
       </div>
-      <div className="flex items-center gap-2">
-        <label className="form-field">
-          From
+
+      <div className="flex items-center gap-3">
+        <label className="flex items-center gap-2 text-xs font-medium text-muted">
+          <span>From:</span>
           <input
             type="date"
-            className="form-input"
+            className="form-input py-1 text-xs"
             value={currentFrom}
             onChange={(e) => setRange(e.target.value, currentTo)}
           />
         </label>
-        <label className="form-field">
-          To
+        <label className="flex items-center gap-2 text-xs font-medium text-muted">
+          <span>To:</span>
           <input
             type="date"
-            className="form-input"
+            className="form-input py-1 text-xs"
             value={currentTo}
             onChange={(e) => setRange(currentFrom, e.target.value)}
           />

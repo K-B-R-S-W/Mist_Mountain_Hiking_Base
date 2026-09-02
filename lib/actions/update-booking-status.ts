@@ -28,7 +28,16 @@ export async function updateBookingStatus(input: unknown): Promise<ActionResult<
     const { id, status } = parsed.data;
 
     const { error } = await supabase.from("bookings").update({ status }).eq("id", id);
-    if (error) throw new Error("Failed to update booking: " + error.message);
+    if (error) {
+      if (
+        error.code === "23P01" ||
+        error.message?.includes("bookings_no_overlapping_dates") ||
+        error.message?.includes("exclusion constraint")
+      ) {
+        throw new Error("These dates overlap with another confirmed booking for this room.");
+      }
+      throw new Error("Failed to update booking: " + error.message);
+    }
 
     await supabase.from("activity_logs").insert({
       user_id: user.id,
@@ -42,4 +51,3 @@ export async function updateBookingStatus(input: unknown): Promise<ActionResult<
     return { id };
   });
 }
-

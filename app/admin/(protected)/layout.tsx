@@ -1,19 +1,9 @@
 import { redirect } from "next/navigation";
-import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import { AdminMobileNav } from "@/components/admin/mobile/admin-mobile-nav";
-
-const NAV = [
-  { href: "/admin", label: "Dashboard" },
-  { href: "/admin/rooms", label: "Rooms" },
-  { href: "/admin/gallery", label: "Gallery" },
-  { href: "/admin/testimonials", label: "Testimonials" },
-  { href: "/admin/bookings", label: "Bookings" },
-  { href: "/admin/insights", label: "AI Insights" },
-  { href: "/admin/reports", label: "Reports" },
-  { href: "/admin/media", label: "Media" },
-  { href: "/admin/settings", label: "Settings" },
-];
+import { AdminSidebar } from "@/components/admin/admin-sidebar";
+import { AdminHeader } from "@/components/admin/admin-header";
+import { ToastProvider } from "@/components/admin/ui/toast";
+import { BOOKING_STATUS } from "@/lib/constants";
 
 export default async function AdminLayout({
   children,
@@ -25,43 +15,36 @@ export default async function AdminLayout({
     data: { user },
   } = await supabase.auth.getUser();
 
-  // Belt-and-braces: middleware already redirects unauthenticated users,
-  // but this layout (and every action underneath it) checks for itself.
   if (!user) redirect("/admin/login");
 
-  const { data: adminRow } = await supabase
-    .from("admin_users")
-    .select("user_id")
-    .eq("user_id", user.id)
-    .maybeSingle();
+  const [adminRowRes, pendingCountRes] = await Promise.all([
+    supabase
+      .from("admin_users")
+      .select("user_id, role")
+      .eq("user_id", user.id)
+      .maybeSingle(),
+    supabase
+      .from("bookings")
+      .select("id", { count: "exact", head: true })
+      .eq("status", BOOKING_STATUS.PENDING),
+  ]);
 
+  const adminRow = adminRowRes.data;
   if (!adminRow) redirect("/admin/login");
 
-  return (
-    <div className="flex min-h-screen flex-col md:flex-row">
-      {/* Mobile topbar — sidebar collapses into this + a drawer below md. See components/admin/mobile/. */}
-      <header className="pt-safe sticky top-0 z-30 flex items-center justify-between border-b border-black/5 bg-surface px-4 py-3 md:hidden">
-        <span className="font-[family-name:var(--font-fraunces)] text-primary">Mist Mountain</span>
-        <AdminMobileNav items={NAV} />
-      </header>
+  const pendingCount = pendingCountRes.count ?? 0;
+  const userRole = adminRow.role || "admin";
+  const userEmail = user.email || "";
 
-      <aside className="hidden w-56 shrink-0 border-r border-black/5 bg-surface p-6 md:block">
-        <p className="mb-8 font-[family-name:var(--font-fraunces)] text-primary">
-          Mist Mountain
-        </p>
-        <nav className="flex flex-col gap-3 text-sm">
-          {NAV.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className="text-text/80 hover:text-primary"
-            >
-              {item.label}
-            </Link>
-          ))}
-        </nav>
-      </aside>
-      <main className="flex-1 bg-background p-4 md:p-8">{children}</main>
-    </div>
+  return (
+    <ToastProvider>
+      <div className="flex min-h-screen bg-background text-text">
+        <AdminSidebar pendingCount={pendingCount} userEmail={userEmail} userRole={userRole} />
+        <div className="flex flex-1 flex-col min-w-0">
+          <AdminHeader pendingCount={pendingCount} userEmail={userEmail} userRole={userRole} />
+          <main className="flex-1 p-4 md:p-8 max-w-7xl w-full mx-auto">{children}</main>
+        </div>
+      </div>
+    </ToastProvider>
   );
 }
