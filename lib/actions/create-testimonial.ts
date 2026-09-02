@@ -6,20 +6,21 @@ import { createClient } from "@/lib/supabase/server";
 import { withAdminAction, type ActionResult } from "@/lib/actions/with-admin-action";
 import { uploadMediaFile } from "@/lib/media/upload";
 
+const toOptionalString = (max: number) =>
+  z.preprocess((val) => {
+    if (val === null || val === undefined) return undefined;
+    const str = String(val).trim();
+    return str === "" ? null : str;
+  }, z.string().max(max).nullable().optional());
+
 const createTestimonialSchema = z.object({
-  name: z.string().trim().min(1).max(200),
-  country: z.string().trim().max(100).optional().or(z.literal("")),
+  name: z.string().trim().min(1, "Name is required").max(200),
+  country: toOptionalString(100),
   rating: z.coerce.number().int().min(1).max(5).optional(),
-  quote: z.string().trim().min(1).max(1000),
+  quote: z.string().trim().min(1, "Quote is required").max(1000),
   isApproved: z.coerce.boolean(),
 });
 
-/**
- * Admin-entered testimonials (e.g. transcribed from a review site or a
- * message from a guest) with an optional photo. is_approved defaults to
- * whatever the admin sets on the form — unlike a public submission path
- * (which doesn't exist yet), there's no untrusted input to gate here.
- */
 export async function createTestimonial(formData: FormData): Promise<ActionResult<{ id: string }>> {
   return withAdminAction(async ({ user }) => {
     const ratingRaw = formData.get("rating");
