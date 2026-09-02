@@ -3,6 +3,7 @@ import { getSiteSettings, getVisibleRooms } from "@/lib/repositories";
 import { generateGeminiChatResponse } from "@/lib/chatbot/gemini-client";
 import { buildSystemPrompt } from "@/lib/chatbot/system-prompt";
 import { processFallbackIntent } from "@/lib/chatbot/intent-engine";
+import { parseBookingDraftFromText } from "@/lib/chatbot/booking-parser";
 import { generateCustomItinerary } from "@/lib/chatbot/itinerary-generator";
 import { MIST_MOUNTAIN_FACTS, USD_EXCHANGE_RATE } from "@/lib/chatbot/knowledge-base";
 import { logUnansweredQuery } from "@/lib/actions/log-unanswered-query";
@@ -107,107 +108,144 @@ export async function POST(req: NextRequest) {
     }));
 
     const cards: CardPayload[] = [];
-    const rawQ = userMessage.trim();
-    const cleanQ = rawQ
-      .replace(/[\u{1F300}-\u{1F9FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu, "")
-      .toLowerCase()
-      .trim();
-
-    // 1. Check for room list inquiries first (e.g. "what rooms are available", "view rooms", "room types", "කාමර මොනවද තියෙන්නේ")
-    if (
-      /what\s*(are\s*the\s*)?rooms|available\s*rooms|rooms\s*available|see\s*rooms|show\s*rooms|room\s*types|all\s*rooms|කාමර\s*මොනවද|සියලුම\s*කාමර|කාමර\s*බලන්න/i.test(
-        cleanQ
-      )
-    ) {
-      cards.push({ type: "room_list", data: roomCards.slice(0, 4) });
-    }
-    // 2. Explicit booking / reservation flow
-    else if (/book|reserve|reservation|check\s*in|check\s*out|වෙන්කර|වෙන් කර/i.test(cleanQ)) {
-      // Find if user mentioned a specific room
-      const matchedRoom = rooms.find((r) =>
-        cleanQ.includes(r.name.toLowerCase()) || (r.slug && cleanQ.includes(r.slug.toLowerCase()))
-      ) || rooms[0];
-
-      cards.push({
-        type: "booking_flow",
-        data: {
-          roomId: matchedRoom?.id,
-          roomName: matchedRoom?.name,
-          pricePerNightLkr: matchedRoom?.basePrice,
-          pricePerNightUsd: matchedRoom ? Math.round(matchedRoom.basePrice / USD_EXCHANGE_RATE) : undefined,
-          availableRooms: rooms.map((r) => ({
-            id: r.id,
-            name: r.name,
-            basePriceLkr: r.basePrice,
-            basePriceUsd: Math.round(r.basePrice / USD_EXCHANGE_RATE),
-            maxGuests: r.maxGuests,
-          })),
-        },
-      });
-    } else if (/itinerary|day\s*plan|දින\s*\d+|දින\s*2|දින\s*3|දින\s*1|චාරිකාව|සැලැස්ම|චාරිකා\s*සැලැස්ම|stay\s*plan/i.test(cleanQ)) {
-      const nights = /1\s*(night|රාත්‍රී)|one\s*night|දින\s*1/i.test(cleanQ) ? 1 : /3|three|දින\s*3/i.test(cleanQ) ? 3 : 2;
-      cards.push({
-        type: "itinerary",
-        data: generateCustomItinerary(nights, activeLanguage),
-      });
-    } else if (/trail|hike|hiking|circuit|kukuluwa|temple|pimbura|mountain|හයිකින්|මංපෙත්|කුකුළුවා|විහාර/i.test(cleanQ)) {
-      cards.push({
-        type: "attraction",
-        data: {
-          id: "kukuluwa_temple",
-          title: activeLanguage === "si" ? "කුකුළුවා රජ මහා විහාරය (ලෙන් විහාරය)" : "Kukuluwa Raja Maha Viharaya",
-          eyebrow: activeLanguage === "si" ? "ඓතිහාසික කඳුකර මංපෙත" : "HISTORIC CAVE TEMPLE & RIDGE",
-          description:
-            activeLanguage === "si"
-              ? "මිස්ට් මවුන්ටන් සිට විනාඩි 45ක මඟපෙන්වන්නන් සහිත සුන්දර කඳුකර පා ගමනකින් ඓතිහාසික කුකුළුවා ලෙන් විහාරය, කටාරම් කෙටූ ගල් ලෙන් සහ අංශක 360 කඳුකර දසුන් නැරඹිය හැක."
-              : "A guided 45-minute mountain trail from the base to an ancient historic cave temple with panoramic valley views, ancient drip ledges, and quiet meditation rock lookouts.",
-          imageUrl: null,
-          href: "/experiences",
-          badge: "Guided Trail",
-        },
-      });
-    } else if (/room|rooms|tariff|rates|price|cost|කාමර|ගාස්තු/i.test(cleanQ)) {
-      cards.push({ type: "room_list", data: roomCards.slice(0, 4) });
-    } else if (/spring|pool|water|swim|bath|දිය\s*තටාක|උල්පත්|නාන්න/i.test(cleanQ)) {
-      cards.push({
-        type: "attraction",
-        data: {
-          id: "spring_pools",
-          title: activeLanguage === "si" ? "ස්වාභාවික උල්පත් දිය තටාක" : "Two Natural Spring Pools",
-          eyebrow: activeLanguage === "si" ? "ස්වාභාවික ජලය" : "CHEMICAL-FREE & GRAVITY FED",
-          description:
-            activeLanguage === "si"
-              ? MIST_MOUNTAIN_FACTS.springPools.si
-              : MIST_MOUNTAIN_FACTS.springPools.en,
-          imageUrl: null,
-          href: "/experiences",
-          badge: "On Property",
-        },
-      });
-    } else if (/contact|location|where|address|phone|whatsapp|drive|reach|directions|පිහිටීම|කොහොමද\s*එන්නේ|ලිපිනය|දුරකථන|පාර/i.test(cleanQ)) {
-      cards.push({
-        type: "nav",
-        data: {
-          label: activeLanguage === "si" ? "සම්බන්ධතා සහ මාර්ග විස්තර" : "Contact & Google Maps",
-          href: "/contact",
-          description: MIST_MOUNTAIN_FACTS.distanceFromColombo,
-        },
-      });
-    } else if (/group|corporate|team|event|outing|company|සමූහ|ආයතනික/i.test(cleanQ)) {
-      cards.push({
-        type: "booking_flow",
-        data: {
-          guests: 10,
-          message: "Small corporate group / team building retreat inquiry",
-        },
-      });
-    }
-
     let responseText = "";
     let quickReplies: string[] = [];
 
     if (geminiResult && geminiResult.text) {
-      responseText = geminiResult.text;
+      const rawAiText = geminiResult.text;
+      const actionMatch = rawAiText.match(/<!--ACTION:([\s\S]*?)-->/i);
+
+      if (actionMatch && actionMatch[1]) {
+        try {
+          const action = JSON.parse(actionMatch[1].trim());
+
+          if (action.card === "booking_flow") {
+            const fallbackParsed = parseBookingDraftFromText(userMessage, rooms);
+            const chosenRoom =
+              rooms.find(
+                (r) =>
+                  (action.room && r.name.toLowerCase().includes(action.room.toLowerCase())) ||
+                  (action.room && r.slug.toLowerCase().includes(action.room.toLowerCase()))
+              ) ||
+              rooms.find((r) => r.id === fallbackParsed.roomId) ||
+              rooms[0];
+
+            const resolvedCheckIn = action.checkIn || fallbackParsed.checkIn;
+            const resolvedCheckOut = action.checkOut || fallbackParsed.checkOut;
+            const resolvedGuests =
+              typeof action.guests === "number" && action.guests > 0
+                ? Math.min(action.guests, chosenRoom?.maxGuests ?? 10)
+                : fallbackParsed.guests;
+
+            cards.push({
+              type: "booking_flow",
+              data: {
+                roomId: chosenRoom?.id,
+                roomName: chosenRoom?.name,
+                pricePerNightLkr: chosenRoom?.basePrice,
+                pricePerNightUsd: chosenRoom
+                  ? Math.round(chosenRoom.basePrice / USD_EXCHANGE_RATE)
+                  : undefined,
+                checkIn: resolvedCheckIn,
+                checkOut: resolvedCheckOut,
+                guests: resolvedGuests,
+                guestName: fallbackParsed.guestName,
+                email: fallbackParsed.email,
+                phone: fallbackParsed.phone,
+                availableRooms: rooms.map((r) => ({
+                  id: r.id,
+                  name: r.name,
+                  basePriceLkr: r.basePrice,
+                  basePriceUsd: Math.round(r.basePrice / USD_EXCHANGE_RATE),
+                  maxGuests: r.maxGuests,
+                })),
+              },
+            });
+          } else if (action.card === "room_list") {
+            cards.push({ type: "room_list", data: roomCards.slice(0, 4) });
+          } else if (action.card === "itinerary") {
+            const n = typeof action.nights === "number" ? action.nights : 2;
+            cards.push({
+              type: "itinerary",
+              data: generateCustomItinerary(n, activeLanguage),
+            });
+          } else if (action.card === "attraction") {
+            if (action.id === "spring_pools") {
+              cards.push({
+                type: "attraction",
+                data: {
+                  id: "spring_pools",
+                  title:
+                    activeLanguage === "si"
+                      ? "ස්වාභාවික උල්පත් දිය තටාක"
+                      : "Two Natural Spring Pools",
+                  eyebrow:
+                    activeLanguage === "si"
+                      ? "ස්වාභාවික ජලය"
+                      : "CHEMICAL-FREE & GRAVITY FED",
+                  description:
+                    activeLanguage === "si"
+                      ? MIST_MOUNTAIN_FACTS.springPools.si
+                      : MIST_MOUNTAIN_FACTS.springPools.en,
+                  imageUrl: null,
+                  href: "/experiences",
+                  badge: "On Property",
+                },
+              });
+            } else {
+              cards.push({
+                type: "attraction",
+                data: {
+                  id: "kukuluwa_temple",
+                  title:
+                    activeLanguage === "si"
+                      ? "කුකුළුවා රජ මහා විහාරය (ලෙන් විහාරය)"
+                      : "Kukuluwa Raja Maha Viharaya",
+                  eyebrow:
+                    activeLanguage === "si"
+                      ? "ඓතිහාසික කඳුකර මංපෙත"
+                      : "HISTORIC CAVE TEMPLE & RIDGE",
+                  description:
+                    activeLanguage === "si"
+                      ? "මිස්ට් මවුන්ටන් සිට විනාඩි 45ක මඟපෙන්වන්නන් සහිත සුන්දර කඳුකර පා ගමනකින් ඓතිහාසික කුකුළුවා ලෙන් විහාරය, කටාරම් කෙටූ ගල් ලෙන් සහ අංශක 360 කඳුකර දසුන් නැරඹිය හැක."
+                      : "A guided 45-minute mountain trail from the base to an ancient historic cave temple with panoramic valley views, ancient drip ledges, and quiet meditation rock lookouts.",
+                  imageUrl: null,
+                  href: "/experiences",
+                  badge: "Guided Trail",
+                },
+              });
+            }
+          } else if (action.card === "nav") {
+            cards.push({
+              type: "nav",
+              data: {
+                label:
+                  activeLanguage === "si"
+                    ? "සම්බන්ධතා සහ මාර්ග විස්තර"
+                    : "Contact & Google Maps",
+                href: "/contact",
+                description: MIST_MOUNTAIN_FACTS.distanceFromColombo,
+              },
+            });
+          }
+        } catch {}
+      }
+
+      responseText = rawAiText.replace(/<!--ACTION:[\s\S]*?-->/gi, "").trim();
+
+      // If Gemini didn't output an action tag, use fallback intent parser as secondary safety net
+      if (cards.length === 0) {
+        const secondaryCheck = processFallbackIntent({
+          userMessage,
+          rooms,
+          settings,
+          language: activeLanguage,
+          history: messages,
+        });
+        if (secondaryCheck.cards && secondaryCheck.cards.length > 0) {
+          cards.push(...secondaryCheck.cards);
+        }
+      }
 
       const needsHandoff =
         /not sure|don't know|cannot answer|contact our team|reach out to our front desk|speak with a human|මම දන්නේ නැත|සම්බන්ධ වන්න/i.test(

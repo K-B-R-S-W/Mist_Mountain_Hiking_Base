@@ -1,6 +1,7 @@
 import { RoomSummary, SiteSettings } from "@/lib/types/domain";
 import { MIST_MOUNTAIN_FACTS, USD_EXCHANGE_RATE } from "./knowledge-base";
 import { generateCustomItinerary } from "./itinerary-generator";
+import { parseBookingDraftFromText } from "./booking-parser";
 import { CardPayload, ChatApiResponse, LanguageCode, RoomCardPayload } from "./types";
 
 export function processFallbackIntent(options: {
@@ -69,17 +70,22 @@ export function processFallbackIntent(options: {
 
   // 2. Room Reservation / Availability Flow
   if (/book|reserve|reservation|check\s*in|check\s*out|වෙන්කර|වෙන් කර/i.test(cleanQ)) {
-    const matchedRoom = rooms.find((r) =>
-      cleanQ.includes(r.name.toLowerCase()) || (r.slug && cleanQ.includes(r.slug.toLowerCase()))
-    ) || rooms[0];
+    const parsedDraft = parseBookingDraftFromText(userMessage, rooms);
+    const chosenRoom = rooms.find((r) => r.id === parsedDraft.roomId) || rooms[0];
 
     cards.push({
       type: "booking_flow",
       data: {
-        roomId: matchedRoom?.id,
-        roomName: matchedRoom?.name,
-        pricePerNightLkr: matchedRoom?.basePrice,
-        pricePerNightUsd: matchedRoom ? Math.round(matchedRoom.basePrice / USD_EXCHANGE_RATE) : undefined,
+        roomId: parsedDraft.roomId || chosenRoom?.id,
+        roomName: parsedDraft.roomName || chosenRoom?.name,
+        pricePerNightLkr: parsedDraft.pricePerNightLkr || chosenRoom?.basePrice,
+        pricePerNightUsd: chosenRoom ? Math.round(chosenRoom.basePrice / USD_EXCHANGE_RATE) : undefined,
+        checkIn: parsedDraft.checkIn,
+        checkOut: parsedDraft.checkOut,
+        guests: parsedDraft.guests,
+        guestName: parsedDraft.guestName,
+        email: parsedDraft.email,
+        phone: parsedDraft.phone,
         availableRooms: rooms.map((r) => ({
           id: r.id,
           name: r.name,
@@ -92,8 +98,8 @@ export function processFallbackIntent(options: {
 
     message =
       activeLang === "si"
-        ? "ඔබගේ දිනයන් සහ අවශ්‍ය කාමරය තෝරා පහසුවෙන්ම වෙන්කරවා ගැනීමේ ඉල්ලීමක් යොමු කරන්න:"
-        : "You can check availability and send your reservation inquiry directly below:";
+        ? "ඔබ ඉල්ලා සිටි කාමරය, දිනයන් සහ ගාස්තු අනුව වෙන්කරවා ගැනීමේ පෝරමය පහතින් සකසා ඇත. කරුණාකර විස්තර පරීක්ෂා කර තහවුරු කරන්න:"
+        : "I have prepared your reservation draft below with your requested room, dates, and guest count. Please verify and complete:";
 
     quickReplies =
       activeLang === "si"
