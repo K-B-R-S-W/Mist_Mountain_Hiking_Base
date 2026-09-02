@@ -252,7 +252,7 @@ export function SettingsTabs({ settings, branding }: SettingsTabsProps) {
               <p className="text-xs text-muted">Primary business information displayed across headers, footers, and booking pages.</p>
             </div>
 
-            <div className="grid gap-4 sm:grid-cols-2">
+            <div className="grid gap-5 sm:grid-cols-2">
               <div className="form-field">
                 <label htmlFor="hotelName" className="text-xs font-medium text-text">
                   Property / Hotel Name
@@ -381,7 +381,7 @@ export function SettingsTabs({ settings, branding }: SettingsTabsProps) {
               </p>
             </div>
 
-            <div className="grid gap-4 sm:grid-cols-2">
+            <div className="grid gap-5 sm:grid-cols-2">
               <div className="form-field">
                 <label htmlFor="whatsapp" className="text-xs font-medium text-text">
                   WhatsApp Phone Number (with Country Code)
@@ -407,6 +407,7 @@ export function SettingsTabs({ settings, branding }: SettingsTabsProps) {
                   placeholder="https://facebook.com/mistmountain"
                   className="form-input"
                 />
+                <span className="text-[11px] text-muted">Full URL to your official Facebook page or profile.</span>
               </div>
 
               <div className="form-field">
@@ -420,6 +421,7 @@ export function SettingsTabs({ settings, branding }: SettingsTabsProps) {
                   placeholder="https://instagram.com/mistmountain"
                   className="form-input"
                 />
+                <span className="text-[11px] text-muted">Link to your official Instagram account.</span>
               </div>
 
               <div className="form-field">
@@ -433,6 +435,7 @@ export function SettingsTabs({ settings, branding }: SettingsTabsProps) {
                   placeholder="https://tiktok.com/@mistmountain"
                   className="form-input"
                 />
+                <span className="text-[11px] text-muted">Link to your official TikTok account.</span>
               </div>
             </div>
           </div>
