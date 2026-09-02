@@ -54,6 +54,16 @@ export default async function ContactPage() {
                 Check on Booking.com
               </a>
             ) : null}
+            {settings.airbnbUrl ? (
+              <a
+                href={settings.airbnbUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="rounded-md border border-background/30 px-4 py-2 text-sm font-medium text-background transition-colors hover:bg-background/10"
+              >
+                Check on Airbnb
+              </a>
+            ) : null}
           </div>
         </article>
       </div>

@@ -13,18 +13,30 @@ export default async function BookPage() {
         practical recommendations for your route plan.
       </p>
 
-      {settings.bookingUrl ? (
+      {settings.bookingUrl || settings.airbnbUrl ? (
         <div className="mt-6 flex flex-wrap items-center gap-3 rounded-md border border-black/10 bg-surface p-4">
-          <a
-            href={settings.bookingUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="btn-secondary"
-          >
-            Check availability on Booking.com
-          </a>
+          {settings.bookingUrl ? (
+            <a
+              href={settings.bookingUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn-secondary"
+            >
+              Check on Booking.com
+            </a>
+          ) : null}
+          {settings.airbnbUrl ? (
+            <a
+              href={settings.airbnbUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn-secondary text-[#FF385C] border-[#FF385C]/30 hover:bg-[#FF385C]/5"
+            >
+              Check on Airbnb
+            </a>
+          ) : null}
           <span className="text-xs text-muted">
-            Prefer to book instantly through our OTA listing instead? Use this link — or send us
+            Prefer to book instantly through our verified OTA listings instead? Use these links — or send us
             your dates directly below and we&apos;ll confirm by phone or email.
           </span>
         </div>

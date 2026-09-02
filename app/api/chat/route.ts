@@ -56,6 +56,7 @@ export async function POST(req: NextRequest) {
         instagram: null,
         tiktok: null,
         bookingUrl: null,
+        airbnbUrl: null,
         googleMapsUrl: null,
         googlePlaceId: null,
         heroTitle: null,

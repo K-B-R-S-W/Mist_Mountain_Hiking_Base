@@ -135,6 +135,7 @@ export type SiteSettings = {
   instagram: string | null;
   tiktok: string | null;
   bookingUrl: string | null;
+  airbnbUrl: string | null;
   googleMapsUrl: string | null;
   googlePlaceId: string | null;
   heroTitle: string | null;

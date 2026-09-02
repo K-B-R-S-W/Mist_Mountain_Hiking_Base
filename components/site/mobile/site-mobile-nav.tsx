@@ -16,12 +16,14 @@ type NavItem = { href: string; label: string };
 export function SiteMobileNav({
   items,
   bookingUrl,
+  airbnbUrl,
   hotelName,
   logoUrl,
   logoAlt,
 }: {
   items: NavItem[];
   bookingUrl?: string | null;
+  airbnbUrl?: string | null;
   hotelName: string;
   logoUrl?: string | null;
   logoAlt?: string | null;
@@ -190,6 +192,16 @@ export function SiteMobileNav({
                     className="rounded-md bg-[#003580] px-4 py-3 text-center text-sm font-medium text-white"
                   >
                     Booking.com
+                  </a>
+                ) : null}
+                {airbnbUrl ? (
+                  <a
+                    href={airbnbUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="rounded-md bg-[#FF385C] px-4 py-3 text-center text-sm font-medium text-white"
+                  >
+                    Airbnb
                   </a>
                 ) : null}
                 <TransitionLink

@@ -88,6 +88,16 @@ export default async function SiteLayout({
                 Booking.com
               </a>
             ) : null}
+            {settings.airbnbUrl ? (
+              <a
+                href={settings.airbnbUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="rounded-md bg-[#FF385C] px-4 py-2 text-sm font-medium text-white transition hover:bg-[#E00B41] hover:scale-[1.02] active:scale-[0.97]"
+              >
+                Airbnb
+              </a>
+            ) : null}
             <TransitionLink
               href="/book"
               label="Book"
@@ -101,6 +111,7 @@ export default async function SiteLayout({
           <SiteMobileNav
             items={NAV}
             bookingUrl={settings.bookingUrl}
+            airbnbUrl={settings.airbnbUrl}
             hotelName={settings.hotelName}
             logoUrl={branding.logoUrl}
             logoAlt={branding.logoAlt}
@@ -155,6 +166,18 @@ export default async function SiteLayout({
                       className="underline underline-offset-4 hover:text-background"
                     >
                       Booking.com
+                    </a>
+                  </li>
+                ) : null}
+                {settings.airbnbUrl ? (
+                  <li>
+                    <a
+                      href={settings.airbnbUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="underline underline-offset-4 hover:text-background"
+                    >
+                      Airbnb
                     </a>
                   </li>
                 ) : null}

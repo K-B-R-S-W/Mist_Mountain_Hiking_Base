@@ -81,6 +81,7 @@ Travel Time: ${MIST_MOUNTAIN_FACTS.distanceFromColombo}
 Check-in: ${MIST_MOUNTAIN_FACTS.checkInTime} | Check-out: ${MIST_MOUNTAIN_FACTS.checkOutTime}
 Contact Details: ${hotelContact}
 Booking URL: ${settings.bookingUrl ?? "Available on website"}
+Airbnb URL: ${settings.airbnbUrl ?? "Available on website"}
 
 VERIFIED ROOMS & TARIFFS:
 ${roomListString || "No rooms currently loaded."}

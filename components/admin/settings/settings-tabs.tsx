@@ -39,6 +39,7 @@ export function SettingsTabs({ settings, branding }: SettingsTabsProps) {
         heroTitle: formData.get("heroTitle"),
         heroSubtitle: formData.get("heroSubtitle"),
         bookingUrl: formData.get("bookingUrl"),
+        airbnbUrl: formData.get("airbnbUrl"),
       });
 
       if (!result.ok) {
@@ -346,7 +347,7 @@ export function SettingsTabs({ settings, branding }: SettingsTabsProps) {
                 />
               </div>
 
-              <div className="form-field sm:col-span-2">
+              <div className="form-field">
                 <label htmlFor="bookingUrl" className="text-xs font-medium text-text">
                   Booking.com Direct Property URL (Optional)
                 </label>
@@ -355,6 +356,19 @@ export function SettingsTabs({ settings, branding }: SettingsTabsProps) {
                   name="bookingUrl"
                   defaultValue={settings.bookingUrl ?? ""}
                   placeholder="https://www.booking.com/hotel/lk/..."
+                  className="form-input"
+                />
+              </div>
+
+              <div className="form-field">
+                <label htmlFor="airbnbUrl" className="text-xs font-medium text-text">
+                  Airbnb Direct Property URL (Optional)
+                </label>
+                <input
+                  id="airbnbUrl"
+                  name="airbnbUrl"
+                  defaultValue={settings.airbnbUrl ?? ""}
+                  placeholder="https://www.airbnb.com/rooms/..."
                   className="form-input"
                 />
               </div>

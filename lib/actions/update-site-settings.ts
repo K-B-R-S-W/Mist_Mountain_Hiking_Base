@@ -42,6 +42,7 @@ const updateSiteSettingsSchema = z.object({
   heroTitle: toOptionalString(200),
   heroSubtitle: toOptionalString(400),
   bookingUrl: toOptionalUrl,
+  airbnbUrl: toOptionalUrl,
   googleMapsUrl: toOptionalString(2000),
   googlePlaceId: toOptionalString(200),
   whatsapp: toOptionalString(30),
@@ -77,6 +78,7 @@ export async function updateSiteSettings(input: unknown): Promise<ActionResult<v
     if (settings.heroTitle !== undefined) updateData.hero_title = settings.heroTitle;
     if (settings.heroSubtitle !== undefined) updateData.hero_subtitle = settings.heroSubtitle;
     if (settings.bookingUrl !== undefined) updateData.booking_url = settings.bookingUrl;
+    if (settings.airbnbUrl !== undefined) updateData.airbnb_url = settings.airbnbUrl;
     if (settings.googleMapsUrl !== undefined) updateData.google_maps_url = settings.googleMapsUrl;
     if (settings.googlePlaceId !== undefined) updateData.google_place_id = settings.googlePlaceId;
     if (settings.whatsapp !== undefined) updateData.whatsapp = settings.whatsapp;
