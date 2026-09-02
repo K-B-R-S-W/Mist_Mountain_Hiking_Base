@@ -26,7 +26,7 @@ export function ChatVoiceGlobe({
       case "processing":
         return "Thinking in the mountain mist...";
       case "speaking":
-        return "Mist Mountain Concierge is speaking...";
+        return "Mist Mountain AI is speaking...";
       case "error":
         return "Audio issue. Try speaking again or type below.";
       default:
@@ -56,43 +56,39 @@ export function ChatVoiceGlobe({
         {!prefersReducedMotion && (
           <>
             <div
-              className={`absolute h-48 w-48 rounded-full blur-2xl transition-all duration-700 ${
-                state === "speaking"
+              className={`absolute h-48 w-48 rounded-full blur-2xl transition-all duration-700 ${state === "speaking"
                   ? "bg-accent/40 scale-125 animate-pulse"
                   : state === "listening"
-                  ? "bg-secondary/40 scale-110 animate-pulse"
-                  : "bg-primary/20 scale-95"
-              }`}
+                    ? "bg-secondary/40 scale-110 animate-pulse"
+                    : "bg-primary/20 scale-95"
+                }`}
             />
             <div
-              className={`absolute h-36 w-36 rounded-full blur-xl transition-all duration-500 ${
-                state === "speaking"
+              className={`absolute h-36 w-36 rounded-full blur-xl transition-all duration-500 ${state === "speaking"
                   ? "bg-amber-400/30 scale-110"
                   : state === "listening"
-                  ? "bg-emerald-400/30 scale-105"
-                  : "bg-primary/30"
-              }`}
+                    ? "bg-emerald-400/30 scale-105"
+                    : "bg-primary/30"
+                }`}
             />
           </>
         )}
 
         {/* Central Orb / Globe */}
         <div
-          className={`relative flex h-28 w-28 items-center justify-center rounded-full border border-white/40 shadow-2xl transition-transform duration-300 ${
-            state === "listening"
+          className={`relative flex h-28 w-28 items-center justify-center rounded-full border border-white/40 shadow-2xl transition-transform duration-300 ${state === "listening"
               ? "scale-110 bg-gradient-to-tr from-[#163126] via-[#284a3a] to-[#407a5d]"
               : state === "speaking"
-              ? "scale-110 bg-gradient-to-tr from-[#163126] via-[#b06a3c] to-[#e69862]"
-              : "bg-gradient-to-tr from-[#163126] to-[#284a3a]"
-          }`}
+                ? "scale-110 bg-gradient-to-tr from-[#163126] via-[#b06a3c] to-[#e69862]"
+                : "bg-gradient-to-tr from-[#163126] to-[#284a3a]"
+            }`}
         >
           {state === "speaking" ? (
             <Volume2 className="h-10 w-10 text-white animate-bounce" />
           ) : (
             <Mic
-              className={`h-10 w-10 text-white ${
-                state === "listening" && !prefersReducedMotion ? "animate-pulse" : ""
-              }`}
+              className={`h-10 w-10 text-white ${state === "listening" && !prefersReducedMotion ? "animate-pulse" : ""
+                }`}
             />
           )}
         </div>

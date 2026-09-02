@@ -29,7 +29,7 @@ export function ChatHeader({
         </div>
         <div>
           <h3 className="font-[family-name:var(--font-fraunces)] text-sm font-semibold text-primary leading-tight">
-            Mist Mountain Concierge
+            Mist Mountain AI
           </h3>
           <p className="text-[10px] text-muted leading-none">
             {language === "si" ? "සක්‍රීයයි • ස්වභාවික නවාතැන්" : "Online • Mountain Retreat"}
